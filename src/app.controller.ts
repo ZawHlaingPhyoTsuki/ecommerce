@@ -1,12 +1,19 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Logger } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Home')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  private readonly logger = new Logger(AppController.name);
 
-  @Get()
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Get('/hello')
+  @ApiResponse({ status: 200, description: 'Hello World' })
   getHello(): string {
-    return this.appService.getHello();
+    this.logger.log('Request to /hello');
+
+    return 'Hello World!';
   }
 }
