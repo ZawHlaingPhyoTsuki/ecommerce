@@ -1,0 +1,46 @@
+model Product {
+    id          String   @id @default(uuid())
+    name        String
+    slug        String
+    description String?
+    price       Decimal  @db.Decimal(10, 2)
+    images      String[]
+    stock       Int      @default(0)
+    isAvailable Boolean  @default(true)
+
+    rating      Decimal @default(0.0) @db.Decimal(3, 2)
+    ratingCount Int     @default(0)
+
+    categoryId String
+    category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+    sellerId   String
+    seller     User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+    ratings    ProductRating[]
+    cartItems  CartItem[]
+    orderItems OrderItem[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([sellerId, slug])
+    @@index([categoryId])
+    @@index([sellerId])
+    @@map("product")
+}
+
+model ProductRating {
+    id        String  @id @default(uuid())
+    productId String
+    userId    String
+    rating    Decimal @db.Decimal(3, 2)
+
+    product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    user    User    @relation("UserGivenRatings", fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([productId, userId])
+    @@map("product_rating")
+}

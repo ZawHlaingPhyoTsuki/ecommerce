@@ -1,0 +1,45 @@
+model Order {
+    id              String      @id @default(uuid())
+    totalAmount     Decimal     @db.Decimal(10, 2)
+    status          OrderStatus @default(PENDING)
+    shippingAddress String
+    phone           String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    buyerId  String?
+    buyer    User?   @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+    sellerId String?
+    seller   User?   @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: SetNull)
+
+    items OrderItem[]
+
+    @@index([buyerId])
+    @@index([sellerId])
+    @@map("order")
+}
+
+model OrderItem {
+    id                  String  @id @default(uuid())
+    orderId             String
+    productId           String?
+    quantity            Int
+    price               Decimal @db.Decimal(10, 2) // price at time of purchase
+    productNameSnapShot String
+
+    order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+    @@map("order_item")
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    SHIPPED
+    DELIVERED
+    CANCELLED
+
+    @@map("order_status")
+}

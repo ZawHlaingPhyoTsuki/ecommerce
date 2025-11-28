@@ -1,0 +1,25 @@
+model User {
+    id            String    @id @default(uuid())
+    name          String
+    email         String
+    emailVerified Boolean   @default(false)
+    image         String?
+    role          String    @default("BUYER")
+    banned        Boolean?
+    banReason     String?
+    banExpires    DateTime?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+
+    sessions Session[]
+    accounts Account[]
+
+    products     Product[]
+    givenRatings ProductRating[] @relation("UserGivenRatings")
+    cart         Cart?
+    orders       Order[]
+    sellerOrders Order[]         @relation("SellerOrders")
+
+    @@unique([email])
+    @@map("user")
+}

@@ -1,0 +1,14 @@
+model Category {
+    id       String    @id @default(uuid())
+    name     String
+    slug     String
+    image    String?
+    products Product[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([name])
+    @@unique([slug])
+    @@map("category")
+}

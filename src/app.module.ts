@@ -5,6 +5,7 @@ import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
+import { UserModule } from './modules/users/user.module';
 
 @Module({
   imports: [
@@ -16,13 +17,14 @@ import { PrismaService } from './prisma/prisma.service';
       useFactory: (prisma: PrismaService) => {
         return {
           auth: auth(prisma),
-          disableGlobalAuthGuard: true,
+          // disableGlobalAuthGuard: true, // doesn't work correctly, use AllowAnonymous
           disableTrustedOriginsCors: true,
         };
       },
       inject: [PrismaService],
     }),
     PrismaModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [],
