@@ -25,7 +25,11 @@ function setupGlobalPipes(app: INestApplication) {
 
 function setupCors(app: INestApplication) {
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3001',
+      'http://localhost:3000',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
