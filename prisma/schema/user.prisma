@@ -1,0 +1,30 @@
+model User {
+    id            String   @id
+    name          String
+    email         String
+    emailVerified Boolean  @default(false)
+    image         String?
+    role          Role     @default(BUYER)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    sessions Session[]
+    accounts Account[]
+
+    products     Product[]
+    givenRatings ProductRating[] @relation("UserGivenRatings")
+    cart         Cart?
+    orders       Order[]
+    sellerOrders Order[]         @relation("SellerOrders")
+
+    @@unique([email])
+    @@map("user")
+}
+
+enum Role {
+    BUYER
+    SELLER
+    ADMIN
+
+    @@map("role")
+}

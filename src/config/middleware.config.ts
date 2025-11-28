@@ -1,5 +1,9 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import express from 'express';
 
 // function setupGlobalPrefix(app: INestApplication) {
@@ -39,7 +43,14 @@ function setupSwagger(app: INestApplication) {
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('docs', app, documentFactory);
+
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  };
+
+  SwaggerModule.setup('docs', app, documentFactory, customOptions);
 }
 
 function setupMiddleware(app: INestApplication) {
