@@ -18,11 +18,10 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": true,
 
-    // ← ADD THESE THREE LINES
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node", "jest"] // optional but helps IDE
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*", "generated/**/*", "prisma.config.ts"],
   "exclude": ["node_modules", "dist"]

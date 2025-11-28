@@ -9,5 +9,6 @@ model Category {
     updatedAt DateTime @updatedAt
 
     @@unique([name])
+    @@unique([slug])
     @@map("category")
 }

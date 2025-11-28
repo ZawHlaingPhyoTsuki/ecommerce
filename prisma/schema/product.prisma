@@ -12,9 +12,9 @@ model Product {
     ratingCount Int     @default(0)
 
     categoryId String
-    category   Category @relation(fields: [categoryId], references: [id])
+    category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
     sellerId   String
-    seller     User     @relation(fields: [sellerId], references: [id])
+    seller     User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
     ratings    ProductRating[]
     cartItems  CartItem[]
