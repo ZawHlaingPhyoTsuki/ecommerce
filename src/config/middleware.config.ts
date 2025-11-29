@@ -5,6 +5,8 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import express from 'express';
+import { Reflector } from '@nestjs/core';
+import { TransformInterceptor } from '../common/interceptors/transform.interceptor';
 
 // function setupGlobalPrefix(app: INestApplication) {
 //   app.setGlobalPrefix('api');
@@ -42,16 +44,21 @@ function setupSwagger(app: INestApplication) {
     .setTitle('Nest-js Swagger Api')
     .setDescription('Swagger Example Api Description')
     .setVersion('1.0')
-    .addServer('http://localhost:3001')
+    .addServer(`http://localhost:${process.env.PORT ?? 3000}`)
     .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, options);
 
   const customOptions: SwaggerCustomOptions = {
+    explorer: true,
     swaggerOptions: {
       persistAuthorization: true,
+      docExpansion: 'none',
+      filter: true,
+      showRequestDuration: true,
     },
+    customSiteTitle: 'API Documentation',
   };
 
   SwaggerModule.setup('docs', app, documentFactory, customOptions);
@@ -61,10 +68,15 @@ function setupMiddleware(app: INestApplication) {
   app.use(express.urlencoded({ extended: true }));
 }
 
+function setupGlobalInterceptors(app: INestApplication) {
+  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
+}
+
 export function setupMiddlewares(app: INestApplication) {
   //   setupGlobalPrefix(app);
   setupCors(app);
   setupGlobalPipes(app);
+  setupGlobalInterceptors(app);
   setupMiddleware(app);
   setupSwagger(app);
 }

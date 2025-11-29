@@ -8,8 +8,17 @@ model User {
     banned        Boolean?
     banReason     String?
     banExpires    DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
+
+    // --- User-specific fields --- //
+    phone            String?
+    address          String?
+    isSellerApproved Boolean   @default(false)
+    sellerBio        String?
+    businessName     String?
+    sellerApprovedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     sessions Session[]
     accounts Account[]
