@@ -1,12 +1,13 @@
 model Product {
-    id          String   @id @default(uuid())
-    name        String
-    slug        String
-    description String?
-    price       Decimal  @db.Decimal(10, 2)
-    images      String[]
-    stock       Int      @default(0)
-    isAvailable Boolean  @default(true)
+    id             String   @id @default(uuid())
+    name           String
+    slug           String
+    description    String?
+    price          Decimal  @db.Decimal(10, 2)
+    images         String[]
+    imagePublicIds String[] @default([])
+    stock          Int      @default(0)
+    isAvailable    Boolean  @default(true)
 
     rating      Decimal @default(0.0) @db.Decimal(3, 2)
     ratingCount Int     @default(0)

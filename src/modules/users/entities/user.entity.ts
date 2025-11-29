@@ -23,6 +23,9 @@ export class UserEntity implements User {
   })
   image: string | null;
 
+  @Exclude()
+  imagePublicId: string | null;
+
   @ApiProperty({
     description: 'Whether the user is banned',
     nullable: true,

@@ -6,6 +6,7 @@ import { auth } from './lib/auth';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { UserModule } from './modules/users/user.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from './modules/users/user.module';
     }),
     PrismaModule,
     UserModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -1,11 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param, Patch } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   ApiBearerAuth,
@@ -19,7 +12,6 @@ import { ApiResponseMessage } from 'src/common/decorators/api-response-message.d
 
 @ApiTags('Admin Users')
 @ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('admin/users')
 export class AdminUsersController {
   constructor(private readonly userService: UserService) {}

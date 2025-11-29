@@ -1,13 +1,11 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
   Patch,
   Post,
-  UseInterceptors,
 } from '@nestjs/common';
 import { Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { UserService } from '../services/user.service';
@@ -24,7 +22,6 @@ import { ApiResponseMessage } from 'src/common/decorators/api-response-message.d
 
 @ApiTags('Users')
 @ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UserService) {}

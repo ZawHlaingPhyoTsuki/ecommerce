@@ -10,6 +10,7 @@ model User {
     banExpires    DateTime?
 
     // --- User-specific fields --- //
+    imagePublicId    String?
     phone            String?
     address          String?
     isSellerApproved Boolean   @default(false)

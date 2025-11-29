@@ -1,4 +1,8 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   DocumentBuilder,
   SwaggerCustomOptions,
@@ -23,6 +27,11 @@ function setupGlobalPipes(app: INestApplication) {
       },
     }),
   );
+}
+
+function setupGlobalInterceptors(app: INestApplication) {
+  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }
 
 function setupCors(app: INestApplication) {
@@ -66,10 +75,6 @@ function setupSwagger(app: INestApplication) {
 
 function setupMiddleware(app: INestApplication) {
   app.use(express.urlencoded({ extended: true }));
-}
-
-function setupGlobalInterceptors(app: INestApplication) {
-  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
 }
 
 export function setupMiddlewares(app: INestApplication) {
