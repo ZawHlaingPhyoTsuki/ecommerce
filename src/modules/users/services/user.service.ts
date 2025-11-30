@@ -28,6 +28,11 @@ export class UserService {
       throw new ConflictException('User is already a seller');
     }
 
+    // Check if user is not a buyer
+    if (user.role !== USER_ROLE.BUYER) {
+      throw new ConflictException('Only buyers can request seller role');
+    }
+
     // Check if there's already a pending request
     if (user.sellerBio && user.sellerApplicationStatus === 'PENDING') {
       throw new ConflictException('There is already a pending request');

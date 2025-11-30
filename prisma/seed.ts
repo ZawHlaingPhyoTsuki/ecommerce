@@ -30,8 +30,7 @@ async function main() {
   });
 
   if (!result.user) {
-    console.error('Failed to create user');
-    process.exit(1);
+    throw new Error('Failed to create user');
   }
 
   console.log('Created user:', result.user.email);
