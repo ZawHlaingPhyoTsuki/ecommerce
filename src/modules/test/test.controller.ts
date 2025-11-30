@@ -12,7 +12,9 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CloudinaryService } from '../cloudinary/services/cloudinary.service';
 import { ApiResponseMessage } from 'src/common/decorators/api-response-message.decorator';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
+@AllowAnonymous()
 @ApiTags('Test - Cloudinary')
 @Controller('test')
 export class TestController {
@@ -212,31 +214,5 @@ export class TestController {
       format: result.format,
       bytes: result.bytes,
     };
-  }
-
-  @Post('/cloudinary-generate-unsigned-signature')
-  @ApiResponseMessage('Signature generated successfully')
-  @ApiOperation({
-    summary: 'Test generate unsigned signature for frontend uploads',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        folder: {
-          type: 'string',
-          enum: ['PRODUCTS', 'AVATARS', 'CATEGORIES', 'TESTING'],
-          example: 'TESTING',
-        },
-      },
-    },
-  })
-  cloudinaryGenerateUnsignedSignature(
-    @Body('folder')
-    folder: 'PRODUCTS' | 'AVATARS' | 'CATEGORIES' | 'TESTING' = 'TESTING',
-  ) {
-    const signature = this.cloudinaryService.generateUnsignedSignature(folder);
-
-    return signature;
   }
 }

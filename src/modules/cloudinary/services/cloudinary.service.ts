@@ -171,34 +171,6 @@ export class CloudinaryService {
   }
 
   /**
-   * Generate signature for direct unsigned upload (frontend use)
-   */
-  generateUnsignedSignature(folder: FolderType = 'PRODUCTS') {
-    const timestamp = Math.round(Date.now() / 1000);
-    const params = {
-      timestamp,
-      folder: CLOUDINARY_FOLDER[folder],
-      upload_preset: process.env.CLOUDINARY_UNSIGNED_PRESET!,
-    };
-
-    const signature = this.cloudinary.utils.api_sign_request(
-      params,
-      process.env.CLOUDINARY_API_SECRET!,
-    );
-
-    this.logger.log(`Generated signature for ${folder}`);
-
-    return {
-      signature,
-      timestamp,
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
-      apiKey: process.env.CLOUDINARY_API_KEY!,
-      folder: CLOUDINARY_FOLDER[folder],
-      uploadPreset: process.env.CLOUDINARY_UNSIGNED_PRESET!,
-    };
-  }
-
-  /**
    * Validate file before upload
    */
   private validateFile(file: Express.Multer.File): void {
