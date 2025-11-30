@@ -1,10 +1,16 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   DocumentBuilder,
   SwaggerCustomOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
 import express from 'express';
+import { Reflector } from '@nestjs/core';
+import { TransformInterceptor } from '../common/interceptors/transform.interceptor';
 
 // function setupGlobalPrefix(app: INestApplication) {
 //   app.setGlobalPrefix('api');
@@ -21,6 +27,11 @@ function setupGlobalPipes(app: INestApplication) {
       },
     }),
   );
+}
+
+function setupGlobalInterceptors(app: INestApplication) {
+  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }
 
 function setupCors(app: INestApplication) {
@@ -42,16 +53,21 @@ function setupSwagger(app: INestApplication) {
     .setTitle('Nest-js Swagger Api')
     .setDescription('Swagger Example Api Description')
     .setVersion('1.0')
-    .addServer('http://localhost:3001')
+    .addServer(`http://localhost:${process.env.PORT ?? 3000}`)
     .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, options);
 
   const customOptions: SwaggerCustomOptions = {
+    explorer: true,
     swaggerOptions: {
       persistAuthorization: true,
+      docExpansion: 'none',
+      filter: true,
+      showRequestDuration: true,
     },
+    customSiteTitle: 'API Documentation',
   };
 
   SwaggerModule.setup('docs', app, documentFactory, customOptions);
@@ -65,6 +81,7 @@ export function setupMiddlewares(app: INestApplication) {
   //   setupGlobalPrefix(app);
   setupCors(app);
   setupGlobalPipes(app);
+  setupGlobalInterceptors(app);
   setupMiddleware(app);
   setupSwagger(app);
 }

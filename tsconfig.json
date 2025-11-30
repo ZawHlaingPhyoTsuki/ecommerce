@@ -20,9 +20,13 @@
 
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "types": ["node", "jest"]
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*", "generated/**/*", "prisma.config.ts"],
+  "include": [
+    "src/**/*",
+    "generated/**/*",
+    "prisma.config.ts",
+    "prisma/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

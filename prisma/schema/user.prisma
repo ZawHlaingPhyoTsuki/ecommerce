@@ -8,8 +8,18 @@ model User {
     banned        Boolean?
     banReason     String?
     banExpires    DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
+
+    // --- User-specific fields --- //
+    imagePublicId           String?
+    phone                   String?
+    address                 String?
+    sellerBio               String?
+    businessName            String?
+    sellerApplicationStatus SellerApplicationStatus @default(NONE)
+    sellerApprovedAt        DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     sessions Session[]
     accounts Account[]
@@ -22,4 +32,11 @@ model User {
 
     @@unique([email])
     @@map("user")
+}
+
+enum SellerApplicationStatus {
+    NONE
+    PENDING
+    APPROVED
+    REJECTED
 }
