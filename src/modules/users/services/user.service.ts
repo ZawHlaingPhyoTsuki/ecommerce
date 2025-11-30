@@ -7,6 +7,7 @@ import {
 import { UserRepository } from '../repositories/user.repository';
 import { RequestSellerRoleDto } from '../dto/request-seller-role.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { USER_ROLE } from 'src/common/constants/role';
 
 @Injectable()
 export class UserService {
@@ -23,12 +24,12 @@ export class UserService {
     }
 
     // Check if user is already a seller
-    if (user.role === 'SELLER') {
+    if (user.role === USER_ROLE.SELLER) {
       throw new ConflictException('User is already a seller');
     }
 
     // Check if there's already a pending request
-    if (user.sellerBio && !user.isSellerApproved) {
+    if (user.sellerBio && user.sellerApplicationStatus !== 'PENDING') {
       throw new ConflictException('There is already a pending request');
     }
 
@@ -50,10 +51,36 @@ export class UserService {
   }
 
   async approveSeller(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === USER_ROLE.SELLER) {
+      throw new ConflictException('User is already a seller');
+    }
+
+    if (user.sellerApplicationStatus !== 'PENDING') {
+      throw new ConflictException('No pending seller request found');
+    }
+
     return this.userRepository.approveSeller(userId);
   }
 
   async rejectSeller(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === USER_ROLE.SELLER) {
+      throw new ConflictException('User is already a seller');
+    }
+
+    if (user.sellerApplicationStatus !== 'PENDING') {
+      throw new ConflictException('No pending seller request found');
+    }
+
     return this.userRepository.rejectSeller(userId);
   }
 

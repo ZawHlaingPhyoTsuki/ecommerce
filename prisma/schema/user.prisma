@@ -10,13 +10,13 @@ model User {
     banExpires    DateTime?
 
     // --- User-specific fields --- //
-    imagePublicId    String?
-    phone            String?
-    address          String?
-    isSellerApproved Boolean   @default(false)
-    sellerBio        String?
-    businessName     String?
-    sellerApprovedAt DateTime?
+    imagePublicId           String?
+    phone                   String?
+    address                 String?
+    sellerBio               String?
+    businessName            String?
+    sellerApplicationStatus SellerApplicationStatus @default(NONE)
+    sellerApprovedAt        DateTime?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -32,4 +32,11 @@ model User {
 
     @@unique([email])
     @@map("user")
+}
+
+enum SellerApplicationStatus {
+    NONE
+    PENDING
+    APPROVED
+    REJECTED
 }

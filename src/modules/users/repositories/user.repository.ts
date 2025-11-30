@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { USER_ROLE } from 'src/common/constants/role';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 import { RequestSellerRoleDto } from '../dto/request-seller-role.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -18,10 +18,10 @@ export class UserRepository {
     return this.prismaService.user.update({
       where: { id },
       data: {
-        ...(data.name && { name: data.name }),
-        ...(data.image && { image: data.image }),
-        ...(data.phone && { phone: data.phone }),
-        ...(data.address && { address: data.address }),
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.image !== undefined && { image: data.image }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.address !== undefined && { address: data.address }),
       },
     });
   }
@@ -36,7 +36,7 @@ export class UserRepository {
         address: data.address,
         // Keep role as BUYER until approved
         role: USER_ROLE.BUYER,
-        isSellerApproved: false,
+        sellerApplicationStatus: 'PENDING',
         sellerApprovedAt: null,
       },
     });
@@ -47,7 +47,7 @@ export class UserRepository {
       where: { id: userId },
       data: {
         role: USER_ROLE.SELLER,
-        isSellerApproved: true,
+        sellerApplicationStatus: 'APPROVED',
         sellerApprovedAt: new Date(),
       },
     });
@@ -58,8 +58,12 @@ export class UserRepository {
       where: { id: userId },
       data: {
         role: USER_ROLE.BUYER,
-        isSellerApproved: false,
+        sellerApplicationStatus: 'REJECTED',
         sellerApprovedAt: null,
+        sellerBio: null,
+        businessName: null,
+        // phone: null,
+        // address: null,
       },
     });
   }
@@ -68,7 +72,8 @@ export class UserRepository {
     return this.prismaService.user.findMany({
       where: {
         role: USER_ROLE.BUYER,
-        isSellerApproved: false,
+        sellerApplicationStatus: 'PENDING',
+        sellerBio: { not: null },
       },
     });
   }

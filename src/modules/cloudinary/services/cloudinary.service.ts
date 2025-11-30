@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { UploadApiOptions, UploadApiResponse, v2 } from 'cloudinary';
-import { CLOUDINARY_FOLDER } from 'src/common/constants/constants';
+import { CLOUDINARY_FOLDER } from 'src/common/constants/cloudinary-folder';
 
 export type FolderType = keyof typeof CLOUDINARY_FOLDER;
 
@@ -13,7 +13,11 @@ export type FolderType = keyof typeof CLOUDINARY_FOLDER;
 export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
 
-  constructor(@Inject('CLOUDINARY') private cloudinary: typeof v2) {}
+  constructor(@Inject('CLOUDINARY') private cloudinary: typeof v2) {
+    this.logger.log('Cloudinary service initialized');
+    this.logger.log(`Cloudinary instance: ${!!this.cloudinary}`);
+    this.logger.log(`Uploader available: ${!!this.cloudinary?.uploader}`);
+  }
 
   /**
    * Upload single file to Cloudinary
@@ -33,10 +37,14 @@ export class CloudinaryService {
   ): Promise<UploadApiResponse> {
     this.validateFile(file);
 
+    const publicId = options?.publicId
+      ? this.extractPublicId(options.publicId)
+      : undefined;
+
     return new Promise((resolve, reject) => {
       const uploadOptions: UploadApiOptions = {
         folder: CLOUDINARY_FOLDER[folder],
-        public_id: options?.publicId,
+        public_id: publicId,
         transformation: [
           // Background removal if requested
           ...(options?.removeBg ? [{ effect: 'background_removal' }] : []),
@@ -208,5 +216,20 @@ export class CloudinaryService {
         `File too large. Maximum size: ${maxSize / 1024 / 1024}MB`,
       );
     }
+  }
+
+  /**
+   * Extract the public ID from a full public ID (e.g., 'folder/filename')
+   */
+  private extractPublicId(fullPublicId: string): string {
+    if (!fullPublicId) return fullPublicId;
+
+    // If it contains slashes, it's likely a full path - extract just the filename
+    if (fullPublicId.includes('/')) {
+      return fullPublicId.split('/').pop()!;
+    }
+
+    // If no slashes, it's already just the filename
+    return fullPublicId;
   }
 }

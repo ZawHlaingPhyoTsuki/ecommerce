@@ -20,6 +20,7 @@ export class RequestSellerRoleDto {
     example: 'Handmade Crafts Co.',
   })
   @IsString()
+  @Length(2, 100)
   businessName: string;
 
   @ApiProperty({

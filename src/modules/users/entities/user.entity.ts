@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'generated/prisma/client';
+import { SellerApplicationStatus, User } from 'generated/prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserEntity implements User {
@@ -53,8 +53,12 @@ export class UserEntity implements User {
   @ApiProperty({ enum: ['BUYER', 'SELLER', 'ADMIN'], example: 'BUYER' })
   role: string;
 
-  @ApiProperty({ description: 'Whether seller is approved', example: false })
-  isSellerApproved: boolean;
+  @ApiProperty({
+    description: 'Seller application status',
+    enum: ['PENDING', 'APPROVED', 'REJECTED', 'NONE'],
+    example: 'PENDING',
+  })
+  sellerApplicationStatus: SellerApplicationStatus;
 
   @ApiProperty({
     description: 'Seller biography',

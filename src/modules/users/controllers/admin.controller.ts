@@ -7,12 +7,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserEntity } from '../entities/user.entity';
-
 import { ApiResponseMessage } from 'src/common/decorators/api-response-message.decorator';
+import { Roles } from '@thallesp/nestjs-better-auth';
+import { UserIdParamDto } from '../dto/user-id-param.dto';
 
 @ApiTags('Admin Users')
 @ApiBearerAuth()
 @Controller('admin/users')
+@Roles(['ADMIN'])
 export class AdminUsersController {
   constructor(private readonly userService: UserService) {}
 
@@ -24,7 +26,8 @@ export class AdminUsersController {
     description: 'Seller approved successfully',
     type: UserEntity,
   })
-  async approveSeller(@Param('userId') userId: string) {
+  async approveSeller(@Param() params: UserIdParamDto) {
+    const { userId } = params;
     const user = await this.userService.approveSeller(userId);
     return new UserEntity(user);
   }
@@ -37,7 +40,8 @@ export class AdminUsersController {
     description: 'Seller rejected successfully',
     type: UserEntity,
   })
-  async rejectSeller(@Param('userId') userId: string) {
+  async rejectSeller(@Param() params: UserIdParamDto) {
+    const { userId } = params;
     const user = await this.userService.rejectSeller(userId);
     return new UserEntity(user);
   }

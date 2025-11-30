@@ -3,7 +3,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin, openAPI } from 'better-auth/plugins';
 import { PrismaClient } from 'generated/prisma/client';
 import { USER_ROLE } from 'src/common/constants/role';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
 
 export const auth = (prisma: PrismaService) => {
   return betterAuth({

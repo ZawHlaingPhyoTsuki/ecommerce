@@ -8,19 +8,9 @@ async function main() {
   console.log(`Start seeding ...`);
 
   // Clear existing data
-  await prisma.test.deleteMany();
-
+  await prisma.user.deleteMany();
   // Seed data
-  await prisma.test.createMany({
-    data: [
-      {
-        name: 'Test 1',
-      },
-      {
-        name: 'Test 2',
-      },
-    ],
-  });
+
   console.log(`Seeding finished.`);
 }
 

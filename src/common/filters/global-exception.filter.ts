@@ -1,0 +1,45 @@
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { ApiResponse } from '../interfaces/api-response.interface';
+
+@Catch()
+export class GlobalExceptionFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+
+    let status: number;
+    let message: string;
+
+    if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse;
+      } else {
+        message = (exceptionResponse as any).message || exception.message;
+      }
+    } else {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      message = 'Internal server error';
+    }
+
+    // Log the error for debugging
+    console.error('Exception caught:', exception);
+
+    const errorResponse: ApiResponse<null> = {
+      statusCode: status,
+      message,
+      data: null,
+    };
+
+    response.status(status).json(errorResponse);
+  }
+}

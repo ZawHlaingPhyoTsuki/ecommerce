@@ -22,6 +22,11 @@ export class TransformInterceptor<T>
   ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
       map((data) => {
+        // If data is already an ApiResponse (from exception filter), return it as is
+        if (this.isApiResponse(data)) {
+          return data;
+        }
+
         const response = context.switchToHttp().getResponse();
         const statusCode = response.statusCode;
 
@@ -37,6 +42,16 @@ export class TransformInterceptor<T>
           data,
         };
       }),
+    );
+  }
+
+  private isApiResponse(data: any): data is ApiResponse<any> {
+    return (
+      data &&
+      typeof data === 'object' &&
+      'statusCode' in data &&
+      'message' in data &&
+      'data' in data
     );
   }
 }
