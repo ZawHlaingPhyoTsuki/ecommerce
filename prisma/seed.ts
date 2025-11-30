@@ -9,13 +9,22 @@ async function main() {
 
   const authInstance = auth(prismaService);
 
-  // Clear existing data
-  await prismaService.user.deleteMany();
-  // Seed data
+  if (process.env.NODE_ENV !== 'production') {
+    // Clear existing data in non-production only
+    await prismaService.user.deleteMany();
+  }
+
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error('Missing SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD env vars');
+  }
+
   const result = await authInstance.api.signUpEmail({
     body: {
-      email: 'admin@example.com',
-      password: 'admin123!',
+      email: adminEmail,
+      password: adminPassword,
       name: 'Administrator',
     },
   });
@@ -36,9 +45,9 @@ async function main() {
     },
   });
 
-  console.log('Admin user created and verified!');
-  console.log(`Email: admin@example.com`);
-  console.log(`Password: admin123!`);
+  console.log('Admin user created and assigned ADMIN role!');
+  console.log(`Email: ${result.user.email}`);
+  console.log('Password: (taken from SEED_ADMIN_PASSWORD env var)');
   console.log(`Role: ADMIN`);
   console.log(`Seeding finished.`);
 }

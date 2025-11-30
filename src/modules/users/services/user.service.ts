@@ -29,7 +29,7 @@ export class UserService {
     }
 
     // Check if there's already a pending request
-    if (user.sellerBio && user.sellerApplicationStatus !== 'PENDING') {
+    if (user.sellerBio && user.sellerApplicationStatus === 'PENDING') {
       throw new ConflictException('There is already a pending request');
     }
 

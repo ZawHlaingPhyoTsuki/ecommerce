@@ -1,9 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { admin, openAPI } from 'better-auth/plugins';
+import { admin as adminPlugin, openAPI } from 'better-auth/plugins';
 import { PrismaClient } from 'generated/prisma/client';
 import { USER_ROLE } from 'src/common/constants/role';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { ac, ADMIN, BUYER, SELLER } from './statement';
 
 export const auth = (prisma: PrismaService) => {
   return betterAuth({
@@ -26,9 +27,15 @@ export const auth = (prisma: PrismaService) => {
     },
     plugins: [
       openAPI(),
-      admin({
+      adminPlugin({
         defaultRole: USER_ROLE.BUYER,
         adminRoles: [USER_ROLE.ADMIN],
+        ac,
+        roles: {
+          ADMIN,
+          BUYER,
+          SELLER,
+        },
       }),
     ],
   });
