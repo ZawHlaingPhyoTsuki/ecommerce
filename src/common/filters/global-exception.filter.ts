@@ -7,9 +7,12 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiResponse } from '../interfaces/api-response.interface';
+import { Logger } from '@nestjs/common';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -32,7 +35,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // Log the error for debugging
-    console.error('Exception caught:', exception);
+    this.logger.error('Exception caught:', exception);
 
     const errorResponse: ApiResponse<null> = {
       statusCode: status,

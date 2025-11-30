@@ -11,10 +11,8 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CloudinaryService } from '../cloudinary/services/cloudinary.service';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { ApiResponseMessage } from 'src/common/decorators/api-response-message.decorator';
 
-@AllowAnonymous()
 @ApiTags('Test - Cloudinary')
 @Controller('test')
 export class TestController {
@@ -45,6 +43,10 @@ export class TestController {
     @UploadedFile() file: Express.Multer.File,
     @Body('publicId') publicId: string,
   ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
     const result = await this.cloudinaryService.uploadSingle(file, 'TESTING', {
       width: 800,
       height: 800,
@@ -86,7 +88,7 @@ export class TestController {
       throw new BadRequestException('No files provided');
     }
 
-    const results = await this.cloudinaryService.uploadMany(files, 'PRODUCTS', {
+    const results = await this.cloudinaryService.uploadMany(files, 'TESTING', {
       width: 800,
       height: 800,
       crop: 'limit',
@@ -148,8 +150,6 @@ export class TestController {
 
     const result = await this.cloudinaryService.deleteMany(publicIds);
 
-    console.log({ result });
-
     // Check if any deletions failed
     const failedDeletions = Object.values(result.deleted).filter(
       (status: any) => status !== 'deleted',
@@ -189,9 +189,13 @@ export class TestController {
     @UploadedFile() file: Express.Multer.File,
     @Body('publicId') publicId: string,
   ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
     const result = await this.cloudinaryService.removeBgUpload(
       file,
-      'PRODUCTS',
+      'TESTING',
       {
         width: 800,
         height: 800,
@@ -222,14 +226,14 @@ export class TestController {
         folder: {
           type: 'string',
           enum: ['PRODUCTS', 'AVATARS', 'CATEGORIES', 'TESTING'],
-          example: 'PRODUCTS',
+          example: 'TESTING',
         },
       },
     },
   })
   cloudinaryGenerateUnsignedSignature(
     @Body('folder')
-    folder: 'PRODUCTS' | 'AVATARS' | 'CATEGORIES' | 'TESTING' = 'PRODUCTS',
+    folder: 'PRODUCTS' | 'AVATARS' | 'CATEGORIES' | 'TESTING' = 'TESTING',
   ) {
     const signature = this.cloudinaryService.generateUnsignedSignature(folder);
 

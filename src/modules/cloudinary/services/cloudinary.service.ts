@@ -14,9 +14,18 @@ export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
 
   constructor(@Inject('CLOUDINARY') private cloudinary: typeof v2) {
-    this.logger.log('Cloudinary service initialized');
-    this.logger.log(`Cloudinary instance: ${!!this.cloudinary}`);
-    this.logger.log(`Uploader available: ${!!this.cloudinary?.uploader}`);
+    // Validate required environment variables at service initialization.
+    const requiredVars = [
+      'CLOUDINARY_API_SECRET',
+      'CLOUDINARY_CLOUD_NAME',
+      'CLOUDINARY_API_KEY',
+    ];
+
+    for (const varName of requiredVars) {
+      if (!process.env[varName]) {
+        throw new Error(`Missing required environment variable: ${varName}`);
+      }
+    }
   }
 
   /**
@@ -222,11 +231,12 @@ export class CloudinaryService {
    * Extract the public ID from a full public ID (e.g., 'folder/filename')
    */
   private extractPublicId(fullPublicId: string): string {
-    if (!fullPublicId) return fullPublicId;
+    if (!fullPublicId) return '';
 
     // If it contains slashes, it's likely a full path - extract just the filename
     if (fullPublicId.includes('/')) {
-      return fullPublicId.split('/').pop()!;
+      const parts = fullPublicId.split('/');
+      return parts[parts.length - 1] || '';
     }
 
     // If no slashes, it's already just the filename
