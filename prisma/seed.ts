@@ -1,11 +1,6 @@
 import { PrismaService } from 'src/modules/prisma/prisma.service';
-import { PrismaClient } from '../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { auth } from 'src/lib/auth';
 import { USER_ROLE } from 'src/common/constants/role';
-
-const pool = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter: pool });
 
 const prismaService = new PrismaService();
 
@@ -15,7 +10,7 @@ async function main() {
   const authInstance = auth(prismaService);
 
   // Clear existing data
-  await prisma.user.deleteMany();
+  await prismaService.user.deleteMany();
   // Seed data
   const result = await authInstance.api.signUpEmail({
     body: {
@@ -32,7 +27,7 @@ async function main() {
 
   console.log('Created user:', result.user.email);
 
-  await prisma.user.update({
+  await prismaService.user.update({
     where: {
       id: result.user.id,
     },
@@ -50,10 +45,10 @@ async function main() {
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await prismaService.$disconnect();
   })
   .catch(async (e) => {
     console.error(e);
-    await prisma.$disconnect();
+    await prismaService.$disconnect();
     process.exit(1);
   });
