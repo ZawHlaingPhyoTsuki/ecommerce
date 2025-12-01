@@ -7,10 +7,10 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { PrismaService } from './modules/prisma/prisma.service';
 import { UserModule } from './modules/users/user.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
-import { APP_FILTER, APP_GUARD, Reflector } from '@nestjs/core';
-import { RolesGuard } from './common/guards/roles.guard';
+import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { TestModule } from './modules/test/test.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -32,14 +32,15 @@ import { TestModule } from './modules/test/test.module';
     UserModule,
     CloudinaryModule,
     TestModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [
-    {
-      provide: APP_GUARD,
-      useFactory: (reflector: Reflector) => new RolesGuard(reflector),
-      inject: [Reflector],
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useFactory: (reflector: Reflector) => new RolesGuard(reflector),
+    //   inject: [Reflector],
+    // },
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,

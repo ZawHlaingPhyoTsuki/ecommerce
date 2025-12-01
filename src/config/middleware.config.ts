@@ -10,7 +10,6 @@ import {
 } from '@nestjs/swagger';
 import express from 'express';
 import { Reflector } from '@nestjs/core';
-import { TransformInterceptor } from '../common/interceptors/transform.interceptor';
 
 // function setupGlobalPrefix(app: INestApplication) {
 //   app.setGlobalPrefix('api');
@@ -30,7 +29,6 @@ function setupGlobalPipes(app: INestApplication) {
 }
 
 function setupGlobalInterceptors(app: INestApplication) {
-  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }
 

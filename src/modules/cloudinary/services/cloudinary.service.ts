@@ -9,6 +9,14 @@ import { CLOUDINARY_FOLDER } from 'src/common/constants/cloudinary-folder';
 
 export type FolderType = keyof typeof CLOUDINARY_FOLDER;
 
+export type UploadOptionsType = {
+  width?: number;
+  height?: number;
+  crop?: 'fill' | 'fit' | 'crop' | 'limit';
+  publicId?: string; // For replacing existing images
+  removeBg?: boolean; // Background removal
+};
+
 @Injectable()
 export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
@@ -36,13 +44,7 @@ export class CloudinaryService {
   async uploadSingle(
     file: Express.Multer.File,
     folder: FolderType = 'PRODUCTS',
-    options?: {
-      width?: number;
-      height?: number;
-      crop?: 'fill' | 'fit' | 'crop' | 'limit';
-      publicId?: string; // For replacing existing images
-      removeBg?: boolean; // Background removal
-    },
+    options?: UploadOptionsType,
   ): Promise<UploadApiResponse> {
     this.validateFile(file);
 
@@ -100,12 +102,7 @@ export class CloudinaryService {
   async uploadMany(
     files: Express.Multer.File[],
     folder: FolderType = 'PRODUCTS',
-    options?: {
-      width?: number;
-      height?: number;
-      crop?: 'fill' | 'fit' | 'crop' | 'limit';
-      removeBg?: boolean;
-    },
+    options?: UploadOptionsType,
   ): Promise<UploadApiResponse[]> {
     if (!files?.length) throw new BadRequestException('No files provided');
 
@@ -157,12 +154,7 @@ export class CloudinaryService {
   async removeBgUpload(
     file: Express.Multer.File,
     folder: FolderType = 'PRODUCTS',
-    options?: {
-      width?: number;
-      height?: number;
-      crop?: 'fill' | 'fit' | 'crop' | 'limit';
-      publicId?: string;
-    },
+    options?: UploadOptionsType,
   ): Promise<UploadApiResponse> {
     return this.uploadSingle(file, folder, {
       ...options,

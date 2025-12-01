@@ -100,10 +100,10 @@ export class UserEntity implements User {
   })
   sellerApprovedAt: Date | null;
 
-  @Exclude()
+  @ApiProperty({ description: 'User created at' })
   createdAt: Date;
 
-  @Exclude()
+  @ApiProperty({ description: 'User updated at' })
   updatedAt: Date;
 
   constructor(partial: Partial<UserEntity>) {
