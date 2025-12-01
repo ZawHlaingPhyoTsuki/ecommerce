@@ -9,8 +9,7 @@ import {
 } from '@nestjs/common';
 import { Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { UserService } from '../services/user.service';
-import { RequestSellerRoleDto } from '../dto/request-seller-role.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { UpdateUserDto, RequestSellerRoleDto, UserResponseDto } from '../dto';
 import { UserEntity } from '../entities/user.entity';
 import {
   ApiBearerAuth,
@@ -18,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ApiResponseMessage } from 'src/common/decorators/api-response-message.decorator';
+import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -28,7 +27,6 @@ export class UsersController {
 
   @Post('me/request-seller')
   @HttpCode(HttpStatus.OK)
-  @ApiResponseMessage('Request submitted successfully')
   @ApiOperation({
     summary: 'Request seller role',
     description:
@@ -37,65 +35,58 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Request submitted successfully',
-    type: UserEntity,
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User is already a seller or has pending request',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
+    type: UserResponseDto,
   })
   async requestSellerRole(
     @Session() session: UserSession,
     @Body() requestSellerRoleDto: RequestSellerRoleDto,
-  ) {
+  ): Promise<UserResponseDto> {
     const user = await this.userService.requestSellerRole(
       session.user.id,
       requestSellerRoleDto,
     );
 
-    return new UserEntity(user);
+    return ApiResponseDto.success(
+      'Request submitted successfully',
+      new UserEntity(user),
+    );
   }
 
   @Get('me')
-  @ApiResponseMessage('User profile retrieved successfully')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
     status: 200,
     description: 'User profile retrieved successfully',
-    type: UserEntity,
+    type: UserResponseDto,
   })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
-  })
-  async getMyProfile(@Session() session: UserSession) {
+  async getMyProfile(
+    @Session() session: UserSession,
+  ): Promise<UserResponseDto> {
     const user = await this.userService.getUserProfile(session.user.id);
-    return new UserEntity(user);
+    return ApiResponseDto.success(
+      'User profile retrieved successfully',
+      new UserEntity(user),
+    );
   }
 
   @Patch('me')
-  @ApiResponseMessage('User updated successfully')
   @ApiOperation({ summary: 'Update user profile' })
   @ApiResponse({
     status: 200,
     description: 'User updated successfully',
-    type: UserEntity,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
+    type: UserResponseDto,
   })
   async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @Session() session: UserSession,
-  ) {
+  ): Promise<UserResponseDto> {
     const user = await this.userService.updateUser(
       session.user.id,
       updateUserDto,
     );
-    return new UserEntity(user);
+    return ApiResponseDto.success(
+      'User updated successfully',
+      new UserEntity(user),
+    );
   }
 }

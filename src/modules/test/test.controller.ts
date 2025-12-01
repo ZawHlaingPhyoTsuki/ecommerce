@@ -11,7 +11,6 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CloudinaryService } from '../cloudinary/services/cloudinary.service';
-import { ApiResponseMessage } from 'src/common/decorators/api-response-message.decorator';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
 @AllowAnonymous()
@@ -21,7 +20,6 @@ export class TestController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
   @Post('/cloudinary-upload-single')
-  @ApiResponseMessage('File uploaded successfully')
   @ApiOperation({ summary: 'Test single file upload to Cloudinary' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -67,7 +65,6 @@ export class TestController {
   }
 
   @Post('/cloudinary-upload-many')
-  @ApiResponseMessage('Files uploaded successfully')
   @ApiOperation({ summary: 'Test multiple files upload to Cloudinary' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -107,7 +104,6 @@ export class TestController {
   }
 
   @Delete('/cloudinary-delete')
-  @ApiResponseMessage('Image deleted successfully')
   @ApiOperation({ summary: 'Test delete single image from Cloudinary' })
   @ApiBody({
     schema: {
@@ -131,7 +127,6 @@ export class TestController {
   }
 
   @Delete('/cloudinary-delete-many')
-  @ApiResponseMessage('Images deleted successfully')
   @ApiOperation({ summary: 'Test delete multiple images from Cloudinary' })
   @ApiBody({
     schema: {
@@ -165,7 +160,6 @@ export class TestController {
   }
 
   @Post('/cloudinary-remove-bg-upload')
-  @ApiResponseMessage('File uploaded with background removed successfully')
   @ApiOperation({
     summary: 'Test upload with background removal to Cloudinary',
   })
