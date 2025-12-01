@@ -92,25 +92,6 @@ export class CategoriesController {
   }
 
   @AllowAnonymous()
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a category by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Category retrieved successfully',
-    type: CategoryResponseDto,
-  })
-  async findOne(
-    @Param() params: CategoryIdParamDto,
-  ): Promise<CategoryResponseDto> {
-    const category = await this.categoriesService.findOne(params.id);
-
-    return ApiResponseDto.success(
-      'Category retrieved successfully',
-      new CategoryEntity(category),
-    );
-  }
-
-  @AllowAnonymous()
   @Get('slug/:slug')
   @ApiOperation({ summary: 'Get a category by slug' })
   @ApiResponse({
@@ -122,6 +103,25 @@ export class CategoriesController {
     @Param() params: CategorySlugParamDto,
   ): Promise<CategoryResponseDto> {
     const category = await this.categoriesService.findBySlug(params.slug);
+
+    return ApiResponseDto.success(
+      'Category retrieved successfully',
+      new CategoryEntity(category),
+    );
+  }
+
+  @AllowAnonymous()
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a category by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Category retrieved successfully',
+    type: CategoryResponseDto,
+  })
+  async findOne(
+    @Param() params: CategoryIdParamDto,
+  ): Promise<CategoryResponseDto> {
+    const category = await this.categoriesService.findOne(params.id);
 
     return ApiResponseDto.success(
       'Category retrieved successfully',
