@@ -140,9 +140,10 @@ export class CategoryRepository {
   }
 
   async existsByName(name: string, excludeId?: string): Promise<boolean> {
+    const formattedName = this.formatName(name);
     const count = await this.prisma.category.count({
       where: {
-        name,
+        name: formattedName,
         ...(excludeId && { id: { not: excludeId } }),
       },
     });

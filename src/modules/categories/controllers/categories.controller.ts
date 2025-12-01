@@ -169,6 +169,7 @@ export class CategoriesController {
       properties: {
         statusCode: { type: 'number', example: 200 },
         message: { type: 'string', example: 'Category deleted successfully' },
+        data: { type: 'null', nullable: true },
       },
     },
   })

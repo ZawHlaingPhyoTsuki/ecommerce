@@ -128,16 +128,26 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID "${id}" not found`);
     }
 
-    // Format the name for comparison if provided
-    const formattedName = dto.name
-      ? this.categoryRepository.formatName(dto.name)
-      : undefined;
+    if (dto.name) {
+      const formattedName = this.categoryRepository.formatName(dto.name);
 
-    // Check if new name conflicts with old category name
-    if (formattedName && formattedName === existingCategory.name) {
-      throw new ConflictException(
-        `New name must be different from the old name`,
+      // Prevent no-op rename
+      if (formattedName === existingCategory.name) {
+        throw new ConflictException(
+          `New name must be different from the old name`,
+        );
+      }
+
+      // Ensure uniqueness across other categories
+      const nameExists = await this.categoryRepository.existsByName(
+        dto.name,
+        id,
       );
+      if (nameExists) {
+        throw new ConflictException(
+          `Category with name "${dto.name}" already exists`,
+        );
+      }
     }
 
     let imageUrl: string | undefined;
