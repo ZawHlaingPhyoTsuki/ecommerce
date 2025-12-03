@@ -43,6 +43,7 @@ import {
   ProductPaginatedResponseDto,
 } from '../dtos/swagger-res.dto';
 import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
+import { RemoveImagesDto } from '../dtos/remove-images.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -226,19 +227,23 @@ export class ProductsController {
     type: ProductResponseDto,
   })
   async removeImages(
-    @Session() session: { user: { id: string } },
+    @Session() session: UserSession,
     @Param() params: ProductIdParamDto,
-    @Body('imageIds') imageIds: string[],
+    @Body() removeImagesDto: RemoveImagesDto,
   ): Promise<ProductResponseDto> {
     const product = await this.productsService.removeImages(
       params.id,
       session.user.id,
-      imageIds,
+      removeImagesDto.imageIds,
     );
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
 
     return ApiResponseDto.success(
       'Images removed successfully',
-      new ProductEntity(product!),
+      new ProductEntity(product),
     );
   }
 }

@@ -6,6 +6,7 @@ import {
   CategoryQueryDto,
 } from '../dtos';
 import { Prisma } from 'generated/prisma/client';
+import slugify from 'slugify';
 
 @Injectable()
 export class CategoryRepository {
@@ -21,7 +22,7 @@ export class CategoryRepository {
     return this.prisma.category.create({
       data: {
         name: this.formatName(data.name),
-        slug: this.generateSlug(data.name),
+        slug: await this.generateSlug(data.name),
         image: data.image,
         imagePublicId: data.imagePublicId,
       },
@@ -107,7 +108,7 @@ export class CategoryRepository {
 
     if (data.name) {
       updateData.name = this.formatName(data.name);
-      updateData.slug = this.generateSlug(data.name);
+      updateData.slug = await this.generateSlug(data.name, id);
     }
 
     if (data.image !== undefined) {
@@ -169,13 +170,29 @@ export class CategoryRepository {
       .join(' ');
   }
 
-  generateSlug(name: string): string {
-    const generatedName = this.formatName(name);
-    return generatedName
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+  /**
+   * Generate a unique slug for a category
+   */
+  async generateSlug(name: string, excludeId?: string): Promise<string> {
+    const baseSlug = slugify(name, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check if slug exists (excluding current category if updating)
+    while (true) {
+      const existing = await this.prisma.category.findUnique({
+        where: { slug },
+      });
+
+      // If no existing category or it's the same category we're updating, slug is unique
+      if (!existing || (excludeId && existing.id === excludeId)) {
+        break;
+      }
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return slug;
   }
 }

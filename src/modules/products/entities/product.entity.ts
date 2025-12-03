@@ -220,7 +220,7 @@ export class ProductEntity
 
     Object.assign(this, rest);
 
-    if (price) {
+    if (price !== undefined && price !== null) {
       this.price =
         typeof price === 'object' && 'toNumber' in price
           ? (price as any).toNumber()

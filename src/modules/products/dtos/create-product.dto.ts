@@ -30,7 +30,7 @@ export class CreateProductDto {
   })
   @IsOptional()
   @IsString()
-  @Length(10, 2000)
+  @Length(3, 2000)
   description?: string;
 
   @ApiProperty({

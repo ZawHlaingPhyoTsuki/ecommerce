@@ -9,7 +9,37 @@ import {
   Max,
   IsUUID,
   IsEnum,
+  Validate,
 } from 'class-validator';
+
+import {
+  ValidationArguments,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+
+export class IsPriceRangeValidConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(
+    _value: any,
+    validationArguments?: ValidationArguments,
+  ): boolean | Promise<boolean> {
+    const object = validationArguments?.object as ProductQueryDto;
+
+    // if both minPrice and maxPrice are provided
+    if (object.minPrice !== undefined && object.maxPrice !== undefined) {
+      return object.maxPrice >= object.minPrice;
+    }
+
+    // if only one is provided, it's valid
+    return true;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  defaultMessage(_validationArguments?: ValidationArguments): string {
+    return 'maxPrice must be greater than or equal to minPrice';
+  }
+}
 
 /**
  * Product query DTO for filtering and pagination
@@ -27,6 +57,7 @@ export class ProductQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(100)
   limit?: number = 10;
 
   @ApiPropertyOptional({
@@ -68,6 +99,7 @@ export class ProductQueryDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @Validate(IsPriceRangeValidConstraint)
   maxPrice?: number;
 
   @ApiPropertyOptional({

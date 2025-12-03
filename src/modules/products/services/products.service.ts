@@ -178,16 +178,8 @@ export class ProductsService {
       );
     }
 
-    // Validate category if provided
-    if (dto.categoryId) {
-      // Check if provided categoryId is not the same as existing category
-      if (dto.categoryId === existingProduct.categoryId) {
-        throw new BadRequestException(
-          'Category ID cannot be the same as existing category',
-        );
-      }
-
-      // Check if provided categoryId exists
+    // Validate category if provided and different from current
+    if (dto.categoryId && dto.categoryId !== existingProduct.categoryId) {
       const categoryExists = await this.productsRepository.categoryExists(
         dto.categoryId,
       );

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID, Matches } from 'class-validator';
 
 /**
  * Product ID parameter DTO
@@ -31,5 +31,8 @@ export class SellerIdAndProductSlugParamDto {
     example: 'wireless-bluetooth-headphones',
   })
   @IsString()
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'Slug must contain only lowercase letters, numbers, and hyphens',
+  })
   slug: string;
 }

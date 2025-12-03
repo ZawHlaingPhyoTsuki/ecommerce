@@ -129,11 +129,17 @@ export class ProductsRepository {
       }),
       ...(categoryId && { categoryId }),
       ...(sellerId && { sellerId }),
-      ...(minPrice !== undefined && { price: { gte: minPrice } }),
-      ...(maxPrice !== undefined && {
+      // ...(minPrice !== undefined && { price: { gte: minPrice } }),
+      // ...(maxPrice !== undefined && {
+      //   price: {
+      //     ...(minPrice !== undefined && { gte: minPrice }),
+      //     lte: maxPrice,
+      //   },
+      // }),
+      ...((minPrice !== undefined || maxPrice !== undefined) && {
         price: {
           ...(minPrice !== undefined && { gte: minPrice }),
-          lte: maxPrice,
+          ...(maxPrice !== undefined && { lte: maxPrice }),
         },
       }),
       ...(minRating !== undefined && { rating: { gte: minRating } }),
