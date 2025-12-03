@@ -7,7 +7,7 @@ import { IsString, IsUUID, Matches } from 'class-validator';
 export class ProductIdParamDto {
   @ApiProperty({
     description: 'Product ID',
-    example: 'clxyz123-product-id',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsString()
   @IsUUID()
@@ -20,7 +20,7 @@ export class ProductIdParamDto {
 export class SellerIdAndProductSlugParamDto {
   @ApiProperty({
     description: 'Seller ID',
-    example: 'clxyz123-seller-id',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsString()
   @IsUUID()

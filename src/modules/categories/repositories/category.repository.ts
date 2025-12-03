@@ -177,22 +177,25 @@ export class CategoryRepository {
     const baseSlug = slugify(name, { lower: true, strict: true });
     let slug = baseSlug;
     let counter = 1;
+    const maxAttempts = 100;
 
     // Check if slug exists (excluding current category if updating)
-    while (true) {
+    while (counter <= maxAttempts) {
       const existing = await this.prisma.category.findUnique({
         where: { slug },
       });
 
       // If no existing category or it's the same category we're updating, slug is unique
       if (!existing || (excludeId && existing.id === excludeId)) {
-        break;
+        return slug;
       }
 
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
 
-    return slug;
+    throw new Error(
+      `Unable to generate a unique slug for "${name}" after ${maxAttempts} attempts`,
+    );
   }
 }

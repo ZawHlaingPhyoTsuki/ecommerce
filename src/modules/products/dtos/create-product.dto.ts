@@ -38,7 +38,13 @@ export class CreateProductDto {
     example: 99.99,
   })
   @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    {
+      message:
+        'Price must be a number with up to 2 decimal places (e.g., 99.99)',
+    },
+  )
   @Min(0.01)
   price: number;
 
@@ -64,7 +70,7 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Category ID',
-    example: 'clxyz123-category-id',
+    example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsString()
   @IsUUID()

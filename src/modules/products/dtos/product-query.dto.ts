@@ -10,6 +10,7 @@ import {
   IsUUID,
   IsEnum,
   Validate,
+  ValidatorConstraint,
 } from 'class-validator';
 
 import {
@@ -17,6 +18,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
+@ValidatorConstraint({ name: 'IsPriceRangeValid', async: false })
 export class IsPriceRangeValidConstraint
   implements ValidatorConstraintInterface
 {

@@ -216,27 +216,22 @@ export class ProductEntity
 
   constructor(partial: Partial<ProductWithRelations>) {
     // Convert Decimal to number for price and rating before assignment
-    const { price, rating, images, ...rest } = partial;
+    const { price, rating, ...rest } = partial;
 
     Object.assign(this, rest);
 
     if (price !== undefined && price !== null) {
       this.price =
-        typeof price === 'object' && 'toNumber' in price
-          ? (price as any).toNumber()
+        price && typeof price === 'object' && 'toNumber' in price
+          ? price.toNumber()
           : Number(price);
     }
 
-    if (rating !== undefined) {
+    if (rating !== undefined && rating !== null) {
       this.rating =
-        typeof rating === 'object' && 'toNumber' in rating
+        rating && typeof rating === 'object' && 'toNumber' in rating
           ? (rating as any).toNumber()
           : Number(rating);
-    }
-
-    // Convert images to ProductImageEntity
-    if (images) {
-      this.images = images.map((img) => new ProductImageEntity(img));
     }
   }
 }

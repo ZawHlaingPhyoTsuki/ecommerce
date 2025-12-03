@@ -31,12 +31,6 @@ export class CategoryEntity implements CategoryWithCount {
   @Expose()
   image: string | null;
 
-  // @ApiProperty({
-  //   description: 'Cloudinary public ID (used for deletion)',
-  //   type: String,
-  //   nullable: true,
-  //   example: 'categories/electronics_v1',
-  // })
   @Exclude()
   imagePublicId: string | null;
 

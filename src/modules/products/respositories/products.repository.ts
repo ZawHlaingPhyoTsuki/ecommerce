@@ -21,6 +21,7 @@ export class ProductsRepository {
     const baseSlug = slugify(name, { lower: true, strict: true });
     let slug = baseSlug;
     let counter = 1;
+    const maxAttempts = 100;
 
     // Check if slug exists for this seller
     while (
@@ -28,6 +29,11 @@ export class ProductsRepository {
         where: { sellerId_slug: { sellerId, slug } },
       })
     ) {
+      if (counter > maxAttempts) {
+        throw new Error(
+          `Unable to generate unique slug for "${name}" after ${maxAttempts} attempts`,
+        );
+      }
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
@@ -84,7 +90,7 @@ export class ProductsRepository {
         name: dto.name,
         slug,
         description: dto.description,
-        price: dto.price,
+        price: new Prisma.Decimal(dto.price),
         stock: dto.stock ?? 0,
         isAvailable: dto.isAvailable ?? true,
         categoryId: dto.categoryId,
@@ -138,11 +144,13 @@ export class ProductsRepository {
       // }),
       ...((minPrice !== undefined || maxPrice !== undefined) && {
         price: {
-          ...(minPrice !== undefined && { gte: minPrice }),
-          ...(maxPrice !== undefined && { lte: maxPrice }),
+          ...(minPrice !== undefined && { gte: new Prisma.Decimal(minPrice) }),
+          ...(maxPrice !== undefined && { lte: new Prisma.Decimal(maxPrice) }),
         },
       }),
-      ...(minRating !== undefined && { rating: { gte: minRating } }),
+      ...(minRating !== undefined && {
+        rating: { gte: new Prisma.Decimal(minRating) },
+      }),
     };
 
     // Build orderBy clause
@@ -212,7 +220,9 @@ export class ProductsRepository {
           ...(dto.description !== undefined && {
             description: dto.description,
           }),
-          ...(dto.price !== undefined && { price: dto.price }),
+          ...(dto.price !== undefined && {
+            price: new Prisma.Decimal(dto.price),
+          }),
           ...(dto.stock !== undefined && { stock: dto.stock }),
           ...(dto.isAvailable !== undefined && {
             isAvailable: dto.isAvailable,

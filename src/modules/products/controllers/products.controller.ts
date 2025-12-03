@@ -30,6 +30,9 @@ import {
   UpdateProductSwaggerDto,
   ProductIdParamDto,
   SellerIdAndProductSlugParamDto,
+  ProductResponseDto,
+  ProductPaginatedResponseDto,
+  RemoveImagesDto,
 } from '../dtos';
 import { ProductEntity } from '../entities/product.entity';
 import {
@@ -38,12 +41,7 @@ import {
   Session,
   UserSession,
 } from '@thallesp/nestjs-better-auth';
-import {
-  ProductResponseDto,
-  ProductPaginatedResponseDto,
-} from '../dtos/swagger-res.dto';
 import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
-import { RemoveImagesDto } from '../dtos/remove-images.dto';
 
 @ApiTags('Products')
 @Controller('products')
