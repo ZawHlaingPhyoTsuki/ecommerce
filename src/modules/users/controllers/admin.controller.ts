@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   ApiBearerAuth,
@@ -22,7 +22,7 @@ import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
 export class AdminUsersController {
   constructor(private readonly userService: UserService) {}
 
-  @Patch(':userId/approve-seller')
+  @Post(':userId/approve-seller')
   @ApiOperation({ summary: 'Approve seller application' })
   @ApiResponse({
     status: 200,
@@ -39,7 +39,7 @@ export class AdminUsersController {
     );
   }
 
-  @Patch(':userId/reject-seller')
+  @Post(':userId/reject-seller')
   @ApiOperation({ summary: 'Reject seller application' })
   @ApiResponse({
     status: 200,
