@@ -216,7 +216,7 @@ export class ProductEntity
 
   constructor(partial: Partial<ProductWithRelations>) {
     // Convert Decimal to number for price and rating before assignment
-    const { price, rating, ...rest } = partial;
+    const { price, rating, images, ...rest } = partial;
 
     Object.assign(this, rest);
 
@@ -230,8 +230,12 @@ export class ProductEntity
     if (rating !== undefined && rating !== null) {
       this.rating =
         typeof rating === 'object' && 'toNumber' in rating
-          ? (rating as any).toNumber()
+          ? rating.toNumber()
           : Number(rating);
+    }
+
+    if (images) {
+      this.images = images.map((img) => new ProductImageEntity(img));
     }
   }
 }

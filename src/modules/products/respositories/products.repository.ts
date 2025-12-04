@@ -7,7 +7,7 @@ import { Prisma } from 'generated/prisma/client';
 interface ProductImageData {
   url: string;
   publicId: string;
-  order: number;
+  order?: number; // Optional - will be computed from array index if not provided
 }
 
 @Injectable()
@@ -81,6 +81,27 @@ export class ProductsRepository {
   }
 
   /**
+   * Build update data object for product fields
+   */
+  private buildProductUpdateData(dto: UpdateProductDto & { slug?: string }) {
+    return {
+      ...(dto.name && { name: dto.name }),
+      ...(dto.slug && { slug: dto.slug }),
+      ...(dto.description !== undefined && {
+        description: dto.description,
+      }),
+      ...(dto.price !== undefined && {
+        price: new Prisma.Decimal(dto.price),
+      }),
+      ...(dto.stock !== undefined && { stock: dto.stock }),
+      ...(dto.isAvailable !== undefined && {
+        isAvailable: dto.isAvailable,
+      }),
+      ...(dto.categoryId && { categoryId: dto.categoryId }),
+    };
+  }
+
+  /**
    * Create a new product
    */
   async create(
@@ -104,7 +125,11 @@ export class ProductsRepository {
         ...(dto.images &&
           dto.images.length > 0 && {
             images: {
-              create: dto.images,
+              create: dto.images.map((img, index) => ({
+                url: img.url,
+                publicId: img.publicId,
+                order: img.order ?? index,
+              })),
             },
           }),
       },
@@ -201,33 +226,36 @@ export class ProductsRepository {
 
   /**
    * Update a product (with optional images)
+   * Handles slug generation internally when name changes
    */
   async update(
     id: string,
+    sellerId: string,
     dto: UpdateProductDto & {
-      slug?: string;
       images?: ProductImageData[];
     },
   ) {
+    // Generate new slug if name is changing
+    let slug: string | undefined;
+    if (dto.name) {
+      const existingProduct = await this.prisma.product.findUnique({
+        where: { id },
+        select: { name: true },
+      });
+
+      if (existingProduct && dto.name !== existingProduct.name) {
+        slug = await this.generateSlug(dto.name, sellerId, id);
+      }
+    }
+
+    // Build base update data
+    const updateData = this.buildProductUpdateData({ ...dto, slug });
+
     // If no images to add, simple update
     if (!dto.images || dto.images.length === 0) {
       return this.prisma.product.update({
         where: { id },
-        data: {
-          ...(dto.name && { name: dto.name }),
-          ...(dto.slug && { slug: dto.slug }),
-          ...(dto.description !== undefined && {
-            description: dto.description,
-          }),
-          ...(dto.price !== undefined && {
-            price: new Prisma.Decimal(dto.price),
-          }),
-          ...(dto.stock !== undefined && { stock: dto.stock }),
-          ...(dto.isAvailable !== undefined && {
-            isAvailable: dto.isAvailable,
-          }),
-          ...(dto.categoryId && { categoryId: dto.categoryId }),
-        },
+        data: updateData,
         include: this.getProductInclude(),
       });
     }
@@ -247,24 +275,12 @@ export class ProductsRepository {
       return tx.product.update({
         where: { id },
         data: {
-          ...(dto.name && { name: dto.name }),
-          ...(dto.slug && { slug: dto.slug }),
-          ...(dto.description !== undefined && {
-            description: dto.description,
-          }),
-          ...(dto.price !== undefined && {
-            price: new Prisma.Decimal(dto.price),
-          }),
-          ...(dto.stock !== undefined && { stock: dto.stock }),
-          ...(dto.isAvailable !== undefined && {
-            isAvailable: dto.isAvailable,
-          }),
-          ...(dto.categoryId && { categoryId: dto.categoryId }),
+          ...updateData,
           images: {
             create: dto.images!.map((img, index) => ({
               url: img.url,
               publicId: img.publicId,
-              order: startOrder + index,
+              order: img.order ?? startOrder + index, // Use provided order or compute from startOrder
             })),
           },
         },
