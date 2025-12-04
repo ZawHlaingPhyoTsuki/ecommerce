@@ -234,7 +234,11 @@ export class ProductsService {
     // Generate new slug if name is changing
     let newSlug: string | undefined;
     if (dto.name && dto.name !== existingProduct.name) {
-      newSlug = await this.productsRepository.generateSlug(dto.name, sellerId);
+      newSlug = await this.productsRepository.generateSlug(
+        dto.name,
+        sellerId,
+        id,
+      );
     }
 
     try {

@@ -17,28 +17,34 @@ export class ProductsRepository {
   /**
    * Generate a unique slug for a product
    */
-  async generateSlug(name: string, sellerId: string): Promise<string> {
+  async generateSlug(
+    name: string,
+    sellerId: string,
+    excludeId?: string,
+  ): Promise<string> {
     const baseSlug = slugify(name, { lower: true, strict: true });
     let slug = baseSlug;
     let counter = 1;
     const maxAttempts = 100;
 
-    // Check if slug exists for this seller
-    while (
-      await this.prisma.product.findUnique({
+    // Check if slug exists for this seller (excluding current product if updating)
+    while (counter <= maxAttempts) {
+      const existing = await this.prisma.product.findUnique({
         where: { sellerId_slug: { sellerId, slug } },
-      })
-    ) {
-      if (counter > maxAttempts) {
-        throw new Error(
-          `Unable to generate unique slug for "${name}" after ${maxAttempts} attempts`,
-        );
+      });
+
+      // If no existing product or it's the same product we're updating, slug is unique
+      if (!existing || (excludeId && existing.id === excludeId)) {
+        return slug;
       }
+
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
 
-    return slug;
+    throw new Error(
+      `Unable to generate a unique slug for "${name}" after ${maxAttempts} attempts`,
+    );
   }
 
   /**
@@ -135,13 +141,6 @@ export class ProductsRepository {
       }),
       ...(categoryId && { categoryId }),
       ...(sellerId && { sellerId }),
-      // ...(minPrice !== undefined && { price: { gte: minPrice } }),
-      // ...(maxPrice !== undefined && {
-      //   price: {
-      //     ...(minPrice !== undefined && { gte: minPrice }),
-      //     lte: maxPrice,
-      //   },
-      // }),
       ...((minPrice !== undefined || maxPrice !== undefined) && {
         price: {
           ...(minPrice !== undefined && { gte: new Prisma.Decimal(minPrice) }),
@@ -253,7 +252,9 @@ export class ProductsRepository {
           ...(dto.description !== undefined && {
             description: dto.description,
           }),
-          ...(dto.price !== undefined && { price: dto.price }),
+          ...(dto.price !== undefined && {
+            price: new Prisma.Decimal(dto.price),
+          }),
           ...(dto.stock !== undefined && { stock: dto.stock }),
           ...(dto.isAvailable !== undefined && {
             isAvailable: dto.isAvailable,
