@@ -222,14 +222,14 @@ export class ProductEntity
 
     if (price !== undefined && price !== null) {
       this.price =
-        price && typeof price === 'object' && 'toNumber' in price
+        typeof price === 'object' && 'toNumber' in price
           ? price.toNumber()
           : Number(price);
     }
 
     if (rating !== undefined && rating !== null) {
       this.rating =
-        rating && typeof rating === 'object' && 'toNumber' in rating
+        typeof rating === 'object' && 'toNumber' in rating
           ? (rating as any).toNumber()
           : Number(rating);
     }
