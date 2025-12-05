@@ -34,14 +34,16 @@ import {
   ProductPaginatedResponseDto,
   RemoveImagesDto,
 } from '../dtos';
-import { ProductEntity } from '../entities/product.entity';
 import {
   AllowAnonymous,
   Roles,
   Session,
   UserSession,
 } from '@thallesp/nestjs-better-auth';
-import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
+import {
+  ApiResponseDto,
+  PaginatedResponseDto,
+} from 'src/common/dtos/api-response.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -72,10 +74,7 @@ export class ProductsController {
       files,
     );
 
-    return ApiResponseDto.created(
-      'Product created successfully',
-      new ProductEntity(product),
-    );
+    return ApiResponseDto.created('Product created successfully', product);
   }
 
   @AllowAnonymous()
@@ -91,9 +90,9 @@ export class ProductsController {
   ): Promise<ProductPaginatedResponseDto> {
     const result = await this.productsService.findAll(query);
 
-    return ApiResponseDto.success(
+    return PaginatedResponseDto.paginated(
       'Products retrieved successfully',
-      result.data.map((product) => new ProductEntity(product)),
+      result.data,
       result.meta,
     );
   }
@@ -114,10 +113,7 @@ export class ProductsController {
       params.slug,
     );
 
-    return ApiResponseDto.success(
-      'Product retrieved successfully',
-      new ProductEntity(product),
-    );
+    return ApiResponseDto.success('Product retrieved successfully', product);
   }
 
   @AllowAnonymous()
@@ -133,10 +129,7 @@ export class ProductsController {
   ): Promise<ProductResponseDto> {
     const product = await this.productsService.findOne(params.id);
 
-    return ApiResponseDto.success(
-      'Product retrieved successfully',
-      new ProductEntity(product),
-    );
+    return ApiResponseDto.success('Product retrieved successfully', product);
   }
 
   @Roles(['SELLER'])
@@ -167,10 +160,7 @@ export class ProductsController {
       throw new NotFoundException('Product not found');
     }
 
-    return ApiResponseDto.success(
-      'Product updated successfully',
-      new ProductEntity(product),
-    );
+    return ApiResponseDto.success('Product updated successfully', product);
   }
 
   @Roles(['SELLER'])
@@ -239,9 +229,6 @@ export class ProductsController {
       throw new NotFoundException('Product not found');
     }
 
-    return ApiResponseDto.success(
-      'Images removed successfully',
-      new ProductEntity(product),
-    );
+    return ApiResponseDto.success('Images removed successfully', product);
   }
 }

@@ -5,11 +5,12 @@ import { PrismaClient } from '../../../generated/prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
-    const pool = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-    super({ adapter: pool });
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL as string,
+    });
+    super({ adapter });
   }
   async onModuleInit() {
-    // Note: this is optional
     await this.$connect();
   }
 }

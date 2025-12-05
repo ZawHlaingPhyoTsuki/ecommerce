@@ -12,6 +12,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { TestModule } from './modules/test/test.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ProductsModule } from './modules/products/products.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ProductsModule } from './modules/products/products.module';
     TestModule,
     CategoriesModule,
     ProductsModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [
