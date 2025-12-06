@@ -52,11 +52,6 @@ function setupSwagger(app: INestApplication) {
 		.setTitle("Nest-js Swagger Api")
 		.setDescription("Swagger Example Api Description")
 		.setVersion("1.0")
-		.addServer(
-			`http://localhost:${process.env.PORT ?? 3000}`,
-			"Local environment",
-		)
-		.addServer("https://ecommerce-1azx.onrender.com", "Production environment")
 		.addBearerAuth()
 		.build();
 
