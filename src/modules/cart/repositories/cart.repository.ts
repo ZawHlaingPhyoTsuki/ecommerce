@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/modules/prisma/prisma.service';
 
 @Injectable()
@@ -25,7 +26,7 @@ export class CartRepository {
                   url: true,
                   order: true,
                 },
-                orderBy: { order: 'asc' as const },
+                orderBy: { order: 'asc' },
                 take: 1,
               },
             },
@@ -33,30 +34,23 @@ export class CartRepository {
         },
         orderBy: {
           product: {
-            name: 'asc' as const,
+            name: 'asc',
           },
         },
       },
-    };
+    } satisfies Prisma.CartInclude;
   }
 
   /**
    * Find or create cart for user
    */
   async findOrCreateCart(userId: string) {
-    let cart = await this.prisma.cart.findUnique({
+    return this.prisma.cart.upsert({
       where: { userId },
+      update: {},
+      create: { userId },
       include: this.getCartInclude(),
     });
-
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { userId },
-        include: this.getCartInclude(),
-      });
-    }
-
-    return cart;
   }
 
   /**
@@ -73,39 +67,40 @@ export class CartRepository {
    * Add item to cart or update quantity if exists
    */
   async addItem(userId: string, productId: string, quantity: number) {
-    const cart = await this.findOrCreateCart(userId);
-
-    // Check if item already exists in cart
-    const existingItem = await this.prisma.cartItem.findUnique({
-      where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId,
-        },
-      },
-    });
-
-    if (existingItem) {
-      // Update quantity
-      await this.prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: {
-          quantity: existingItem.quantity + quantity,
-        },
+    return this.prisma.$transaction(async (tx) => {
+      // Find or create cart
+      const cart = await tx.cart.upsert({
+        where: { userId },
+        update: {},
+        create: { userId },
       });
-    } else {
-      // Create new cart item
-      await this.prisma.cartItem.create({
-        data: {
+
+      // Add/Update item
+      await tx.cartItem.upsert({
+        where: {
+          cartId_productId: {
+            cartId: cart.id,
+            productId,
+          },
+        },
+        update: {
+          quantity: {
+            increment: quantity,
+          },
+        },
+        create: {
           cartId: cart.id,
           productId,
           quantity,
         },
       });
-    }
 
-    // Return updated cart
-    return this.findByUserId(userId);
+      // Return updated cart
+      return tx.cart.findUnique({
+        where: { userId },
+        include: this.getCartInclude(),
+      });
+    });
   }
 
   /**
@@ -139,7 +134,7 @@ export class CartRepository {
       });
     }
 
-    return this.findByUserId(userId);
+    return this.findOrCreateCart(userId);
   }
 
   /**
@@ -164,17 +159,6 @@ export class CartRepository {
         },
       },
     });
-  }
-
-  /**
-   * Check if product exists
-   */
-  async productExists(productId: string): Promise<boolean> {
-    const product = await this.prisma.product.findUnique({
-      where: { id: productId },
-      select: { id: true },
-    });
-    return !!product;
   }
 
   /**

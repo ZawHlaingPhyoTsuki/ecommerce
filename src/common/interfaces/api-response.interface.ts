@@ -1,11 +1,11 @@
-export interface ApiResponse<T> {
+export interface IApiResponse<T> {
   statusCode: number;
   message: string;
   data?: T;
   meta?: any;
 }
 
-export interface PaginationMeta {
+export interface IPaginationMeta {
   total: number;
   page: number;
   limit: number;

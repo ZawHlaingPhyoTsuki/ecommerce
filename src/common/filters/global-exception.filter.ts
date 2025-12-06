@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiResponse } from '../interfaces/api-response.interface';
+import { IApiResponse } from '../interfaces/api-response.interface';
 import { Logger } from '@nestjs/common';
 
 @Catch()
@@ -37,7 +37,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // Log the error for debugging
     this.logger.error('Exception caught:', exception);
 
-    const errorResponse: ApiResponse<null> = {
+    const errorResponse: IApiResponse<null> = {
       statusCode: status,
       message,
       data: null,

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
 
 /**
@@ -41,7 +41,7 @@ export class CartItemProductDto {
   })
   isAvailable: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Product images',
     type: 'array',
     items: {

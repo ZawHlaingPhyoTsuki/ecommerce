@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ApiResponseDto,
   PaginatedResponseDto,
   PaginationMeta,
 } from 'src/common/dtos/api-response.dto';
@@ -179,15 +180,15 @@ export class ProductDto {
 /**
  * Product response DTO for Swagger
  */
-export class ProductResponseDto {
+export class ProductResponseDto extends ApiResponseDto<ProductDto> {
   @ApiProperty({ example: 200 })
-  statusCode: number;
+  declare statusCode: number;
 
   @ApiProperty({ example: 'Product retrieved successfully' })
-  message: string;
+  declare message: string;
 
   @ApiProperty({ type: ProductDto })
-  data: ProductDto;
+  declare data: ProductDto;
 }
 
 /**

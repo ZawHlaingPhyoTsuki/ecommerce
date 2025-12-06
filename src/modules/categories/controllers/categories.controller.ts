@@ -33,7 +33,10 @@ import {
   CategoriesResponseDto,
 } from '../dtos';
 import { AllowAnonymous, Roles } from '@thallesp/nestjs-better-auth';
-import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
+import {
+  ApiResponseDto,
+  PaginatedResponseDto,
+} from 'src/common/dtos/api-response.dto';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -78,9 +81,10 @@ export class CategoriesController {
   ): Promise<CategoriesResponseDto> {
     const result = await this.categoriesService.findAll(query);
 
-    return ApiResponseDto.success(
+    return PaginatedResponseDto.paginated(
       'Categories retrieved successfully',
       result.data,
+      result.meta,
     );
   }
 

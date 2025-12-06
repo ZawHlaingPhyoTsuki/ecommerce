@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { CartRepository } from '../repositories/cart.repository';
 import { AddToCartDto, UpdateCartItemDto, CartDto } from '../dtos';
+import { convertDecimal } from 'src/common/utils/prisma.utils';
 
 // Infer types from repository return types
 type CartWithItems = NonNullable<
@@ -21,16 +22,6 @@ export class CartService {
   constructor(private readonly cartRepository: CartRepository) {}
 
   /**
-   * Convert Prisma Decimal to number
-   */
-  private convertDecimal(value: any): number {
-    if (typeof value === 'object' && value !== null && 'toNumber' in value) {
-      return value.toNumber();
-    }
-    return Number(value || 0);
-  }
-
-  /**
    * Transform cart data and calculate totals
    */
   private transformCart(cart: CartWithItems): CartDto {
@@ -43,7 +34,7 @@ export class CartService {
           id: item.product.id,
           name: item.product.name,
           slug: item.product.slug,
-          price: this.convertDecimal(item.product.price),
+          price: convertDecimal(item.product.price),
           stock: item.product.stock,
           isAvailable: item.product.isAvailable,
           images: item.product.images || [],
@@ -105,24 +96,31 @@ export class CartService {
     }
 
     // Check if enough stock
-    if (product.stock < (dto.quantity || 1)) {
+    const cart = await this.cartRepository.findOrCreateCart(userId);
+    const existingItem = cart.items.find(
+      (item) => item.productId === dto.productId,
+    );
+    const existingQty = existingItem?.quantity || 0;
+    const requestedQty = dto.quantity || 1;
+
+    if (product.stock < existingQty + requestedQty) {
       throw new BadRequestException(
-        `Insufficient stock for product "${product.name}". Available: ${product.stock}`,
+        `Insufficient stock for product "${product.name}". Available: ${product.stock}, In cart: ${existingQty}`,
       );
     }
 
-    const cart = await this.cartRepository.addItem(
+    const addedCart = await this.cartRepository.addItem(
       userId,
       dto.productId,
       dto.quantity || 1,
     );
 
-    if (!cart) {
+    if (!addedCart) {
       throw new NotFoundException('Cart not found');
     }
 
     this.logger.log(`Item added to cart successfully`);
-    return this.transformCart(cart);
+    return this.transformCart(addedCart);
   }
 
   /**

@@ -13,6 +13,7 @@ import {
   ProductDto,
 } from '../dtos';
 import { CloudinaryService } from 'src/modules/cloudinary/services/cloudinary.service';
+import { convertDecimal } from 'src/common/utils/prisma.utils';
 
 // Infer types from repository return types
 type ProductWithRelations = NonNullable<
@@ -31,16 +32,6 @@ export class ProductsService {
   ) {}
 
   /**
-   * Convert Prisma Decimal to number
-   */
-  private convertDecimal(value: any): number {
-    if (typeof value === 'object' && value !== null && 'toNumber' in value) {
-      return value.toNumber();
-    }
-    return Number(value || 0);
-  }
-
-  /**
    * Transform product data from Prisma to DTO
    */
   private transformProduct(product: ProductWithRelations): ProductDto {
@@ -49,7 +40,7 @@ export class ProductsService {
       name: product.name,
       slug: product.slug,
       description: product.description,
-      price: this.convertDecimal(product.price),
+      price: convertDecimal(product.price),
       images: product.images?.map((img: ProductImage) => ({
         id: img.id,
         productId: img.productId,
@@ -59,7 +50,7 @@ export class ProductsService {
       })),
       stock: product.stock,
       isAvailable: product.isAvailable,
-      rating: this.convertDecimal(product.rating),
+      rating: convertDecimal(product.rating),
       ratingCount: product.ratingCount,
       categoryId: product.categoryId,
       category: product.category,
@@ -410,7 +401,10 @@ export class ProductsService {
 
       // Return updated product
       const updatedProduct = await this.productsRepository.findOne(id);
-      return this.transformProduct(updatedProduct!);
+      if (!updatedProduct) {
+        throw new NotFoundException(`Product with ID "${id}" not found`);
+      }
+      return this.transformProduct(updatedProduct);
     } catch (error) {
       this.logger.error(`Failed to remove images from product: ${id}`, error);
       throw error;

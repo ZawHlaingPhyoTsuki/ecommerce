@@ -51,6 +51,7 @@ export class CartController {
 
   @Roles(['BUYER'])
   @Post('items')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Add item to cart',
     description:
