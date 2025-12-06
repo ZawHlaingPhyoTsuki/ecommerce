@@ -1,201 +1,201 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 import {
-  CreateCategoryDto,
-  UpdateCategoryDto,
-  CategoryQueryDto,
-} from '../dtos';
-import { Prisma } from 'generated/prisma/client';
-import slugify from 'slugify';
+	CreateCategoryDto,
+	UpdateCategoryDto,
+	CategoryQueryDto,
+} from "../dtos";
+import { Prisma } from "generated/prisma/client";
+import slugify from "slugify";
 
 @Injectable()
 export class CategoryRepository {
-  private readonly logger = new Logger(CategoryRepository.name);
+	private readonly logger = new Logger(CategoryRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: CreateCategoryDto & { image?: string; imagePublicId?: string },
-  ) {
-    this.logger.log(`Creating category: ${data.name}`);
+	async create(
+		data: CreateCategoryDto & { image?: string; imagePublicId?: string },
+	) {
+		this.logger.log(`Creating category: ${data.name}`);
 
-    return this.prisma.category.create({
-      data: {
-        name: this.formatName(data.name),
-        slug: await this.generateSlug(data.name),
-        image: data.image,
-        imagePublicId: data.imagePublicId,
-      },
-    });
-  }
+		return this.prisma.category.create({
+			data: {
+				name: this.formatName(data.name),
+				slug: await this.generateSlug(data.name),
+				image: data.image,
+				imagePublicId: data.imagePublicId,
+			},
+		});
+	}
 
-  async findAll(query: CategoryQueryDto) {
-    const { page = 1, limit = 10, search } = query;
-    const skip = (page - 1) * limit;
+	async findAll(query: CategoryQueryDto) {
+		const { page = 1, limit = 10, search } = query;
+		const skip = (page - 1) * limit;
 
-    const where: Prisma.CategoryWhereInput = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' as const } },
-            { slug: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }
-      : {};
+		const where: Prisma.CategoryWhereInput = search
+			? {
+					OR: [
+						{ name: { contains: search, mode: "insensitive" as const } },
+						{ slug: { contains: search, mode: "insensitive" as const } },
+					],
+				}
+			: {};
 
-    this.logger.log(
-      `Fetching categories - Page: ${page}, Limit: ${limit}, Search: ${search || 'none'}`,
-    );
+		this.logger.log(
+			`Fetching categories - Page: ${page}, Limit: ${limit}, Search: ${search || "none"}`,
+		);
 
-    const [categories, total] = await Promise.all([
-      this.prisma.category.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          _count: {
-            select: { products: true },
-          },
-        },
-      }),
-      this.prisma.category.count({ where }),
-    ]);
+		const [categories, total] = await Promise.all([
+			this.prisma.category.findMany({
+				where,
+				skip,
+				take: limit,
+				orderBy: { createdAt: "desc" },
+				include: {
+					_count: {
+						select: { products: true },
+					},
+				},
+			}),
+			this.prisma.category.count({ where }),
+		]);
 
-    return {
-      data: categories,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
+		return {
+			data: categories,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+			},
+		};
+	}
 
-  async findOne(id: string) {
-    this.logger.log(`Fetching category by ID: ${id}`);
+	async findOne(id: string) {
+		this.logger.log(`Fetching category by ID: ${id}`);
 
-    return this.prisma.category.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { products: true },
-        },
-      },
-    });
-  }
+		return this.prisma.category.findUnique({
+			where: { id },
+			include: {
+				_count: {
+					select: { products: true },
+				},
+			},
+		});
+	}
 
-  async findBySlug(slug: string) {
-    this.logger.log(`Fetching category by slug: ${slug}`);
+	async findBySlug(slug: string) {
+		this.logger.log(`Fetching category by slug: ${slug}`);
 
-    return this.prisma.category.findUnique({
-      where: { slug },
-      include: {
-        _count: {
-          select: { products: true },
-        },
-      },
-    });
-  }
+		return this.prisma.category.findUnique({
+			where: { slug },
+			include: {
+				_count: {
+					select: { products: true },
+				},
+			},
+		});
+	}
 
-  async update(
-    id: string,
-    data: UpdateCategoryDto & { image?: string; imagePublicId?: string },
-  ) {
-    this.logger.log(`Updating category: ${id}`);
+	async update(
+		id: string,
+		data: UpdateCategoryDto & { image?: string; imagePublicId?: string },
+	) {
+		this.logger.log(`Updating category: ${id}`);
 
-    const updateData: Prisma.CategoryUpdateInput = {};
+		const updateData: Prisma.CategoryUpdateInput = {};
 
-    if (data.name) {
-      updateData.name = this.formatName(data.name);
-      updateData.slug = await this.generateSlug(data.name, id);
-    }
+		if (data.name) {
+			updateData.name = this.formatName(data.name);
+			updateData.slug = await this.generateSlug(data.name, id);
+		}
 
-    if (data.image !== undefined) {
-      updateData.image = data.image;
-    }
+		if (data.image !== undefined) {
+			updateData.image = data.image;
+		}
 
-    if (data.imagePublicId !== undefined) {
-      updateData.imagePublicId = data.imagePublicId;
-    }
+		if (data.imagePublicId !== undefined) {
+			updateData.imagePublicId = data.imagePublicId;
+		}
 
-    return this.prisma.category.update({
-      where: { id },
-      data: updateData,
-    });
-  }
+		return this.prisma.category.update({
+			where: { id },
+			data: updateData,
+		});
+	}
 
-  async delete(id: string) {
-    this.logger.log(`Deleting category: ${id}`);
+	async delete(id: string) {
+		this.logger.log(`Deleting category: ${id}`);
 
-    return this.prisma.category.delete({
-      where: { id },
-    });
-  }
+		return this.prisma.category.delete({
+			where: { id },
+		});
+	}
 
-  async exists(id: string): Promise<boolean> {
-    const count = await this.prisma.category.count({
-      where: { id },
-    });
-    return count > 0;
-  }
+	async exists(id: string): Promise<boolean> {
+		const count = await this.prisma.category.count({
+			where: { id },
+		});
+		return count > 0;
+	}
 
-  async existsByName(name: string, excludeId?: string): Promise<boolean> {
-    const formattedName = this.formatName(name);
-    const count = await this.prisma.category.count({
-      where: {
-        name: formattedName,
-        ...(excludeId && { id: { not: excludeId } }),
-      },
-    });
-    return count > 0;
-  }
+	async existsByName(name: string, excludeId?: string): Promise<boolean> {
+		const formattedName = this.formatName(name);
+		const count = await this.prisma.category.count({
+			where: {
+				name: formattedName,
+				...(excludeId && { id: { not: excludeId } }),
+			},
+		});
+		return count > 0;
+	}
 
-  formatName(name: string): string {
-    const smallWords =
-      /^(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v\.?|vs\.?|via)$/i;
+	formatName(name: string): string {
+		const smallWords =
+			/^(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v\.?|vs\.?|via)$/i;
 
-    return name
-      .toLowerCase()
-      .split(/[\s\-_]+/) // Split by spaces, hyphens, and underscores
-      .map((word, index, words) => {
-        // Don't capitalize small words unless they're the first or last word
-        if (index > 0 && index < words.length - 1 && smallWords.test(word)) {
-          return word;
-        }
+		return name
+			.toLowerCase()
+			.split(/[\s\-_]+/) // Split by spaces, hyphens, and underscores
+			.map((word, index, words) => {
+				// Don't capitalize small words unless they're the first or last word
+				if (index > 0 && index < words.length - 1 && smallWords.test(word)) {
+					return word;
+				}
 
-        // Capitalize first letter of each word
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      })
-      .join(' ');
-  }
+				// Capitalize first letter of each word
+				return word.charAt(0).toUpperCase() + word.slice(1);
+			})
+			.join(" ");
+	}
 
-  /**
-   * Generate a unique slug for a category
-   */
-  async generateSlug(name: string, excludeId?: string): Promise<string> {
-    const baseSlug = slugify(name, { lower: true, strict: true });
-    let slug = baseSlug;
-    let counter = 1;
-    const maxAttempts = 100;
+	/**
+	 * Generate a unique slug for a category
+	 */
+	async generateSlug(name: string, excludeId?: string): Promise<string> {
+		const baseSlug = slugify(name, { lower: true, strict: true });
+		let slug = baseSlug;
+		let counter = 1;
+		const maxAttempts = 100;
 
-    // Check if slug exists (excluding current category if updating)
-    while (counter <= maxAttempts) {
-      const existing = await this.prisma.category.findUnique({
-        where: { slug },
-      });
+		// Check if slug exists (excluding current category if updating)
+		while (counter <= maxAttempts) {
+			const existing = await this.prisma.category.findUnique({
+				where: { slug },
+			});
 
-      // If no existing category or it's the same category we're updating, slug is unique
-      if (!existing || (excludeId && existing.id === excludeId)) {
-        return slug;
-      }
+			// If no existing category or it's the same category we're updating, slug is unique
+			if (!existing || (excludeId && existing.id === excludeId)) {
+				return slug;
+			}
 
-      slug = `${baseSlug}-${counter}`;
-      counter++;
-    }
+			slug = `${baseSlug}-${counter}`;
+			counter++;
+		}
 
-    throw new Error(
-      `Unable to generate a unique slug for "${name}" after ${maxAttempts} attempts`,
-    );
-  }
+		throw new Error(
+			`Unable to generate a unique slug for "${name}" after ${maxAttempts} attempts`,
+		);
+	}
 }
