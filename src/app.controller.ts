@@ -7,11 +7,11 @@ import { AllowAnonymous } from "@thallesp/nestjs-better-auth";
 export class AppController {
 	private readonly logger = new Logger(AppController.name);
 
-	@Get("/hello")
+	@Get("/")
 	@ApiResponse({ status: 200, description: "Hello World" })
 	@AllowAnonymous()
 	getHello(): string {
-		this.logger.log("Request to /hello");
+		this.logger.log("Request to /");
 
 		return "Hello World!";
 	}
