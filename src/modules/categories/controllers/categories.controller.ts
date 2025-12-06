@@ -29,14 +29,14 @@ import {
   UpdateCategorySwaggerDto,
   CategoryIdParamDto,
   CategorySlugParamDto,
+  CategoryResponseDto,
+  CategoriesResponseDto,
 } from '../dtos';
-import { CategoryEntity } from '../entities/category.entity';
 import { AllowAnonymous, Roles } from '@thallesp/nestjs-better-auth';
 import {
-  CategoryResponseDto,
-  CategoryPaginatedResponseDto,
-} from '../dtos/swagger-res.dto';
-import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
+  ApiResponseDto,
+  PaginatedResponseDto,
+} from 'src/common/dtos/api-response.dto';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -65,10 +65,7 @@ export class CategoriesController {
       file,
     );
 
-    return ApiResponseDto.created(
-      'Category created successfully',
-      new CategoryEntity(category),
-    );
+    return ApiResponseDto.created('Category created successfully', category);
   }
 
   @AllowAnonymous()
@@ -77,16 +74,16 @@ export class CategoriesController {
   @ApiResponse({
     status: 200,
     description: 'Categories retrieved successfully',
-    type: CategoryPaginatedResponseDto,
+    type: CategoriesResponseDto,
   })
   async findAll(
     @Query() query: CategoryQueryDto,
-  ): Promise<CategoryPaginatedResponseDto> {
+  ): Promise<CategoriesResponseDto> {
     const result = await this.categoriesService.findAll(query);
 
-    return ApiResponseDto.success(
+    return PaginatedResponseDto.paginated(
       'Categories retrieved successfully',
-      result.data.map((cat) => new CategoryEntity(cat)),
+      result.data,
       result.meta,
     );
   }
@@ -104,10 +101,7 @@ export class CategoriesController {
   ): Promise<CategoryResponseDto> {
     const category = await this.categoriesService.findBySlug(params.slug);
 
-    return ApiResponseDto.success(
-      'Category retrieved successfully',
-      new CategoryEntity(category),
-    );
+    return ApiResponseDto.success('Category retrieved successfully', category);
   }
 
   @AllowAnonymous()
@@ -123,10 +117,7 @@ export class CategoriesController {
   ): Promise<CategoryResponseDto> {
     const category = await this.categoriesService.findOne(params.id);
 
-    return ApiResponseDto.success(
-      'Category retrieved successfully',
-      new CategoryEntity(category),
-    );
+    return ApiResponseDto.success('Category retrieved successfully', category);
   }
 
   @Roles(['ADMIN'])
@@ -151,10 +142,7 @@ export class CategoriesController {
       file,
     );
 
-    return ApiResponseDto.success(
-      'Category updated successfully',
-      new CategoryEntity(category),
-    );
+    return ApiResponseDto.success('Category updated successfully', category);
   }
 
   @Roles(['ADMIN'])

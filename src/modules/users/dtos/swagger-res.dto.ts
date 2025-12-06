@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SellerApplicationStatus, User } from 'generated/prisma/client';
-import { Exclude } from 'class-transformer';
+import { SellerApplicationStatus } from 'generated/prisma/client';
+import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
 
-export class UserEntity implements User {
+/**
+ * User DTO
+ */
+export class UserDto {
   @ApiProperty({ description: 'User ID' })
   id: string;
 
@@ -22,9 +25,6 @@ export class UserEntity implements User {
     example: 'https://example.com/avatar.jpg',
   })
   image: string | null;
-
-  @Exclude()
-  imagePublicId: string | null;
 
   @ApiProperty({
     description: 'Whether the user is banned',
@@ -105,8 +105,32 @@ export class UserEntity implements User {
 
   @ApiProperty({ description: 'User updated at' })
   updatedAt: Date;
+}
 
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
-  }
+/**
+ * User response DTO for Swagger
+ */
+export class UserResponseDto extends ApiResponseDto<UserDto> {
+  @ApiProperty({ example: 200 })
+  declare statusCode: number;
+
+  @ApiProperty({ example: 'User retrieved successfully' })
+  declare message: string;
+
+  @ApiProperty({ type: UserDto })
+  declare data: UserDto;
+}
+
+/**
+ * Users list response DTO for Swagger
+ */
+export class UsersResponseDto extends ApiResponseDto<UserDto[]> {
+  @ApiProperty({ example: 200 })
+  declare statusCode: number;
+
+  @ApiProperty({ example: 'Users retrieved successfully' })
+  declare message: string;
+
+  @ApiProperty({ type: [UserDto] })
+  declare data: UserDto[];
 }

@@ -6,13 +6,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserEntity } from '../entities/user.entity';
 import { Roles } from '@thallesp/nestjs-better-auth';
-import {
-  UserIdParamDto,
-  UserPaginatedResponseDto,
-  UserResponseDto,
-} from '../dto';
+import { UserIdParamDto, UsersResponseDto, UserResponseDto } from '../dtos';
 import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
 
 @ApiTags('Admin Users')
@@ -33,10 +28,7 @@ export class AdminUsersController {
     @Param() params: UserIdParamDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.approveSeller(params.userId);
-    return ApiResponseDto.success(
-      'Seller approved successfully',
-      new UserEntity(user),
-    );
+    return ApiResponseDto.success('Seller approved successfully', user);
   }
 
   @Post(':userId/reject-seller')
@@ -50,10 +42,7 @@ export class AdminUsersController {
     @Param() params: UserIdParamDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.rejectSeller(params.userId);
-    return ApiResponseDto.success(
-      'Seller rejected successfully',
-      new UserEntity(user),
-    );
+    return ApiResponseDto.success('Seller rejected successfully', user);
   }
 
   @Get('/seller-applications')
@@ -61,14 +50,13 @@ export class AdminUsersController {
   @ApiResponse({
     status: 200,
     description: 'Pending seller applications retrieved successfully',
-    type: UserPaginatedResponseDto,
+    type: UsersResponseDto,
   })
-  async getPendingSellerApplications(): Promise<UserPaginatedResponseDto> {
+  async getPendingSellerApplications(): Promise<UsersResponseDto> {
     const users = await this.userService.getPendingSellerApplications();
     return ApiResponseDto.success(
       'Pending seller applications retrieved successfully',
-      users.map((user) => new UserEntity(user)),
-      undefined,
+      users,
     );
   }
 }

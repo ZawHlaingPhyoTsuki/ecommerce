@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
-import { RequestSellerRoleDto, UpdateUserDto } from '../dto';
+import { RequestSellerRoleDto, UpdateUserDto } from '../dtos';
 import { USER_ROLE } from 'src/common/constants/role';
 
 @Injectable()

@@ -6,8 +6,20 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { ProductsRepository } from '../respositories/products.repository';
-import { CreateProductDto, UpdateProductDto, ProductQueryDto } from '../dtos';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  ProductQueryDto,
+  ProductDto,
+} from '../dtos';
 import { CloudinaryService } from 'src/modules/cloudinary/services/cloudinary.service';
+import { convertDecimal } from 'src/common/utils/prisma.utils';
+
+// Infer types from repository return types
+type ProductWithRelations = NonNullable<
+  Awaited<ReturnType<ProductsRepository['findOne']>>
+>;
+type ProductImage = ProductWithRelations['images'][number];
 
 @Injectable()
 export class ProductsService {
@@ -18,6 +30,37 @@ export class ProductsService {
     private readonly productsRepository: ProductsRepository,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  /**
+   * Transform product data from Prisma to DTO
+   */
+  private transformProduct(product: ProductWithRelations): ProductDto {
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      price: convertDecimal(product.price),
+      images: product.images?.map((img: ProductImage) => ({
+        id: img.id,
+        productId: img.productId,
+        url: img.url,
+        order: img.order,
+        createdAt: img.createdAt,
+      })),
+      stock: product.stock,
+      isAvailable: product.isAvailable,
+      rating: convertDecimal(product.rating),
+      ratingCount: product.ratingCount,
+      categoryId: product.categoryId,
+      category: product.category,
+      sellerId: product.sellerId,
+      seller: product.seller,
+      _count: product._count,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    };
+  }
 
   /**
    * Create a new product
@@ -85,7 +128,7 @@ export class ProductsService {
       });
 
       this.logger.log(`Product created successfully: ${product.id}`);
-      return product;
+      return this.transformProduct(product);
     } catch (error) {
       // Cleanup uploaded images if product creation fails
       if (uploadedImages.length > 0) {
@@ -107,7 +150,12 @@ export class ProductsService {
    */
   async findAll(query: ProductQueryDto) {
     this.logger.log('Fetching all products');
-    return this.productsRepository.findAll(query);
+    const result = await this.productsRepository.findAll(query);
+
+    return {
+      data: result.data.map((product) => this.transformProduct(product)),
+      meta: result.meta,
+    };
   }
 
   /**
@@ -121,7 +169,7 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
 
-    return product;
+    return this.transformProduct(product);
   }
 
   /**
@@ -139,7 +187,7 @@ export class ProductsService {
       );
     }
 
-    return product;
+    return this.transformProduct(product);
   }
 
   /**
@@ -240,7 +288,7 @@ export class ProductsService {
       });
 
       this.logger.log(`Product updated successfully: ${id}`);
-      return product;
+      return this.transformProduct(product);
     } catch (error) {
       // Cleanup newly uploaded images if update fails
       if (uploadedImages.length > 0) {
@@ -352,7 +400,11 @@ export class ProductsService {
       this.logger.log(`Removed ${imageIds.length} images from product`);
 
       // Return updated product
-      return this.productsRepository.findOne(id);
+      const updatedProduct = await this.productsRepository.findOne(id);
+      if (!updatedProduct) {
+        throw new NotFoundException(`Product with ID "${id}" not found`);
+      }
+      return this.transformProduct(updatedProduct);
     } catch (error) {
       this.logger.error(`Failed to remove images from product: ${id}`, error);
       throw error;

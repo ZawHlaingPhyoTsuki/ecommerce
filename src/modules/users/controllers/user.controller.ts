@@ -9,8 +9,7 @@ import {
 } from '@nestjs/common';
 import { Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { UserService } from '../services/user.service';
-import { UpdateUserDto, RequestSellerRoleDto, UserResponseDto } from '../dto';
-import { UserEntity } from '../entities/user.entity';
+import { UpdateUserDto, RequestSellerRoleDto, UserResponseDto } from '../dtos';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -46,10 +45,7 @@ export class UsersController {
       requestSellerRoleDto,
     );
 
-    return ApiResponseDto.success(
-      'Request submitted successfully',
-      new UserEntity(user),
-    );
+    return ApiResponseDto.success('Request submitted successfully', user);
   }
 
   @Get('me')
@@ -63,10 +59,7 @@ export class UsersController {
     @Session() session: UserSession,
   ): Promise<UserResponseDto> {
     const user = await this.userService.getUserProfile(session.user.id);
-    return ApiResponseDto.success(
-      'User profile retrieved successfully',
-      new UserEntity(user),
-    );
+    return ApiResponseDto.success('User profile retrieved successfully', user);
   }
 
   @Patch('me')
@@ -84,9 +77,6 @@ export class UsersController {
       session.user.id,
       updateUserDto,
     );
-    return ApiResponseDto.success(
-      'User updated successfully',
-      new UserEntity(user),
-    );
+    return ApiResponseDto.success('User updated successfully', user);
   }
 }
