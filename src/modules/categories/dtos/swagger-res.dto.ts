@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dtos/api-response.dto';
+import {
+  ApiResponseDto,
+  PaginatedResponseDto,
+  PaginationMeta,
+} from 'src/common/dtos/api-response.dto';
 
 /**
  * Category DTO
@@ -73,7 +77,7 @@ export class CategoryResponseDto extends ApiResponseDto<CategoryDto> {
 /**
  * Categories list response DTO for Swagger
  */
-export class CategoriesResponseDto extends ApiResponseDto<CategoryDto[]> {
+export class CategoriesResponseDto extends PaginatedResponseDto<CategoryDto[]> {
   @ApiProperty({ example: 200 })
   declare statusCode: number;
 
@@ -82,4 +86,7 @@ export class CategoriesResponseDto extends ApiResponseDto<CategoryDto[]> {
 
   @ApiProperty({ type: [CategoryDto] })
   declare data: CategoryDto[];
+
+  @ApiProperty({ type: PaginationMeta })
+  declare meta: PaginationMeta;
 }
