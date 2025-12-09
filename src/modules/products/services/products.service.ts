@@ -5,7 +5,7 @@ import {
 	BadRequestException,
 	ForbiddenException,
 } from "@nestjs/common";
-import { ProductsRepository } from "../respositories/products.repository";
+import { ProductsRepository } from "../repositories/products.repository";
 import {
 	CreateProductDto,
 	UpdateProductDto,
