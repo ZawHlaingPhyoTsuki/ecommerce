@@ -13,6 +13,7 @@ import { TestModule } from "./modules/test/test.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { CartModule } from "./modules/cart/cart.module";
+import { OrdersModule } from "./modules/orders/orders.module";
 
 @Module({
 	imports: [
@@ -37,14 +38,10 @@ import { CartModule } from "./modules/cart/cart.module";
 		CategoriesModule,
 		ProductsModule,
 		CartModule,
+		OrdersModule,
 	],
 	controllers: [AppController],
 	providers: [
-		// {
-		//   provide: APP_GUARD,
-		//   useFactory: (reflector: Reflector) => new RolesGuard(reflector),
-		//   inject: [Reflector],
-		// },
 		{
 			provide: APP_FILTER,
 			useClass: GlobalExceptionFilter,
